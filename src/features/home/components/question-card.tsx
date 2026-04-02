@@ -26,6 +26,10 @@ export interface QuestionCardProps {
 const LOCAL_LOGOS: Record<string, number> = {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   phonepe: require("../../../../assets/phone-pay.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  google: require("../../../../assets/google.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  microsoft: require("../../../../assets/microsoft.png") as number,
 };
 
 function getLogoSource(item: Question): ImageSource {

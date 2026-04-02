@@ -28,11 +28,11 @@ const PRACTICE_TITLE = "Practicing Top 50 Questions for\nBig Tech Companies";
 const headerShadow =
   Platform.OS === "ios"
     ? {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 4,
-      }
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 4,
+    }
     : { elevation: 2 };
 
 /** Figma: notification badge — green circle with lightning bolt + count */
@@ -146,15 +146,19 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-/** Figma: yellow "X users completed Question N today" strip */
+/** Figma: "X users completed Question N today" strip — no bg, dashed line below */
 function SocialProofBanner({ question }: { question: Question }) {
   return (
-    <View style={styles.proofBanner}>
-      <Ionicons name="flag" size={14} color="#B8860B" style={styles.proofIcon} />
-      <Text style={styles.proofText}>
-        {question.completedTodayCount.toLocaleString()} users completed Question{" "}
-        {question.questionNumber} today
-      </Text>
+    <View style={styles.proofWrap}>
+      <View style={styles.proofBanner}>
+        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
+        <Text style={styles.proofText}>
+          {question.completedTodayCount.toLocaleString()} users completed Question{" "}
+          {question.questionNumber} today
+        </Text>
+        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
+      </View>
+      <View style={styles.proofDash} />
     </View>
   );
 }
@@ -244,23 +248,31 @@ const styles = StyleSheet.create({
   },
 
   /* ── Social proof banner ────────────────────────────────── */
-  /** Figma Yellow/50 = warm amber background strip */
+  proofWrap: {
+    marginBottom: spacing.s,
+  },
   proofBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF3CD",
-    borderRadius: spacing.xs,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
-    marginBottom: spacing.s,
     gap: spacing.xxs,
   },
-  proofIcon: { marginRight: 2 },
+  proofIcon: { marginHorizontal: 2 },
   proofText: {
     fontFamily: typography.fonts.inter.semiBold,
     fontSize: typography.sizes.xs,
-    color: "#B8860B",
+    color: "#BF9C26",
     letterSpacing: 0.2,
     flex: 1,
+    textAlign: "center",
+  },
+  /** Dashed divider — achieved via borderStyle: 'dashed' */
+  proofDash: {
+    height: 0,
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#BF9C26",
+    borderStyle: "dashed",
+    marginHorizontal: spacing.s,
   },
 });

@@ -13,15 +13,16 @@ const GAP = 8;
 
 type TabName = "HomeTab" | "SettingsTab" | "StoreTab";
 
-const TAB_META: Record<TabName, { icon: string; label: string }> = {
-    HomeTab: { icon: "home", label: "Home" },
-    SettingsTab: { icon: "settings-outline", label: "Settings" },
-    StoreTab: { icon: "bag-handle-outline", label: "Store" },
+const TAB_META: Record<TabName, { iconActive: string; iconInactive: string; label: string }> = {
+    HomeTab: { iconActive: "home", iconInactive: "home-outline", label: "Home" },
+    SettingsTab: { iconActive: "options", iconInactive: "options-outline", label: "Settings" },
+    StoreTab: { iconActive: "bag", iconInactive: "bag-outline", label: "Store" },
 };
 
-const ACTIVE_COLOR = "#F97316"; // Orange/50
+const ACTIVE_COLOR = "#F97316";   // Orange/50
 const INACTIVE_COLOR = palette.gray60;
-const ACTIVE_BG = "#FFF0E6"; // soft orange tint behind active icon
+const STORE_BG = "#e2f3ff";   // always-on blue tint
+const STORE_ICON_COLOR = "#082f49"; // deep navy — darker icon
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
@@ -41,12 +42,14 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     return (
         <View style={[styles.wrapper, { paddingBottom: insets.bottom || 16 }]}>
             <View style={styles.row}>
+
                 {/* ── Pill: Home + Settings ───────────────────────────── */}
                 <View style={styles.pill}>
                     {pillTabs.map((route) => {
                         const isFocused = state.index === state.routes.indexOf(route);
                         const meta = TAB_META[route.name as TabName];
                         const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
+                        const icon = isFocused ? meta.iconActive : meta.iconInactive;
 
                         return (
                             <Pressable
@@ -57,9 +60,8 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                                 accessibilityLabel={meta.label}
                                 style={styles.pillTab}
                             >
-                                <View style={[styles.iconWrapper, isFocused && styles.iconWrapperActive]}>
-                                    <Ionicons name={meta.icon as any} size={22} color={color} />
-                                </View>
+                                {/* No background circle — just tint icon + label */}
+                                <Ionicons name={icon as any} size={22} color={color} />
                                 <Text style={[styles.label, { color }]}>{meta.label}</Text>
                             </Pressable>
                         );
@@ -72,17 +74,20 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                     accessibilityRole="button"
                     accessibilityState={{ selected: storeActive }}
                     accessibilityLabel="Store"
-                    style={[styles.storeCircle, storeActive && styles.storeCircleActive]}
+                    style={styles.storeCircle}
                 >
+                    {/* Glass shine strips — clipped by the circle overflow:hidden */}
+                    <View style={styles.storeShine1} />
+                    <View style={styles.storeShine2} />
+
                     <Ionicons
-                        name={"bag-handle-outline" as any}
+                        name={(storeActive ? "bag" : "bag-outline") as any}
                         size={26}
-                        color={storeActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+                        color={STORE_ICON_COLOR}
                     />
-                    <Text style={[styles.label, { color: storeActive ? ACTIVE_COLOR : INACTIVE_COLOR }]}>
-                        Store
-                    </Text>
+                    <Text style={[styles.label, { color: STORE_ICON_COLOR }]}>Store</Text>
                 </Pressable>
+
             </View>
         </View>
     );
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-around",
         borderWidth: 1,
-        borderColor: palette.gray20, // Grey/15 ≈ gray20
+        borderColor: palette.gray20,
         ...shadow,
     },
     pillTab: {
@@ -133,33 +138,40 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         gap: 2,
     },
-    iconWrapper: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    iconWrapperActive: {
-        backgroundColor: ACTIVE_BG,
-    },
 
     /* ── Store circle ──────────────────────────────────────── */
     storeCircle: {
         width: STORE_SIZE,
         height: STORE_SIZE,
         borderRadius: STORE_SIZE / 2,
-        backgroundColor: "#fff",
+        backgroundColor: STORE_BG,
         alignItems: "center",
         justifyContent: "center",
         gap: 2,
         borderWidth: 1,
         borderColor: palette.gray20,
+        overflow: "hidden", // clips the glass shine strips
         ...shadow,
     },
-    storeCircleActive: {
-        backgroundColor: "#FFF0E6",
-        borderColor: ACTIVE_COLOR,
+    /** Glass strip 1 — diagonal, clipped by circle overflow:hidden */
+    storeShine1: {
+        position: "absolute",
+        width: 18,
+        height: 120,
+        left: -4,
+        top: -30,
+        backgroundColor: "rgba(255,255,255,0.45)",
+        transform: [{ rotate: "30deg" }],
+    },
+    /** Glass strip 2 — slightly right of strip 1 */
+    storeShine2: {
+        position: "absolute",
+        width: 10,
+        height: 120,
+        left: 22,
+        top: -30,
+        backgroundColor: "rgba(255,255,255,0.45)",
+        transform: [{ rotate: "30deg" }],
     },
 
     /* ── Shared ──────────────────────────────────────────────*/
