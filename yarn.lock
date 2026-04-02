@@ -768,6 +768,11 @@
   resolved "https://registry.yarnpkg.com/@expo-google-fonts/inter/-/inter-0.4.2.tgz#2d37ffb1cb16600cff616b6c4c0efee9b6c47c28"
   integrity sha512-syfiImMaDmq7cFi0of+waE2M4uSCyd16zgyWxdPOY7fN2VBmSLKEzkfbZgeOjJq61kSqPBNNtXjggiQiSD6gMQ==
 
+"@expo-google-fonts/onest@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@expo-google-fonts/onest/-/onest-0.4.1.tgz#da199ee88f61417a96fe74c3a24e7bb3a649f75a"
+  integrity sha512-g+onvw0be9D/W/5WPYaEP+PT/MUma+Gb6O1n/T0FvRBMRx5fMHDMwjwzd3vY95G5zEAxPv1e53XIpxHiKd5DoA==
+
 "@expo/cli@55.0.19":
   version "55.0.19"
   resolved "https://registry.yarnpkg.com/@expo/cli/-/cli-55.0.19.tgz#f6965d540e857c8d3701698a7a4e858bf5c1c62d"

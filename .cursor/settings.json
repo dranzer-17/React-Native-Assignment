@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "figma": {
+      "enabled": true,
+      "projectDesign": {
+        "name": "Grapevine Internship Program (Copy)",
+        "figmaUrl": "https://www.figma.com/design/QDtUooMxzMZYLJSn7uTIm6/Grapevine-Internship-Program--Copy-?node-id=2-16244",
+        "fileKey": "QDtUooMxzMZYLJSn7uTIm6",
+        "nodeId": "2:16244"
+      }
+    }
+  }
+}
