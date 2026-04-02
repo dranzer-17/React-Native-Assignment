@@ -4,17 +4,43 @@
   "companyName": "PhonePe",
   "smartSummary": {
     "whatWorkedWell": [
-      "Add your bullet points here based on the Figma"
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut."
     ],
     "overallTakeaways": [
-      "Add your bullet points here based on the Figma"
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut.",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut."
     ]
   },
   "keyMoments": [
     {
-      "timestamp": "01:37",
-      "description": "Add key moment description here",
+      "timestamp": "00:42",
+      "description": "Clearly identified the root cause of latency variability.",
       "type": "positive"
+    },
+    {
+      "timestamp": "01:15",
+      "description": "Missed mentioning skeleton screens as a loading strategy.",
+      "type": "negative"
+    },
+    {
+      "timestamp": "01:37",
+      "description": "Good use of optimistic UI pattern with rollback on error.",
+      "type": "positive"
+    },
+    {
+      "timestamp": "02:10",
+      "description": "Explained retry logic and exponential backoff correctly.",
+      "type": "positive"
+    },
+    {
+      "timestamp": "02:48",
+      "description": "Did not address offline-first caching as a fallback.",
+      "type": "negative"
     }
   ],
   "audioDurationSeconds": 312

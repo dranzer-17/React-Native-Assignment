@@ -25,6 +25,7 @@ export const palette = {
 
   // Grays
   gray10: "#F9FAFB",
+  gray15: "#F6F7F8",
   gray20: "#F3F4F6",
   gray30: "#E5E7EB",
   gray40: "#D1D5DB",

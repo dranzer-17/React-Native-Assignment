@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useRef } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import type { ImageSource } from "expo-image";
@@ -8,10 +8,12 @@ import { palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
+import type { CardLayout } from "@/features/home/components/question-popover";
+
 export interface QuestionCardProps {
   item: Question;
   index: number;
-  onPressCard: (item: Question) => void;
+  onPressCard: (item: Question, layout: CardLayout) => void;
 }
 
 /**
@@ -26,6 +28,8 @@ export interface QuestionCardProps {
 const LOCAL_LOGOS: Record<string, number> = {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   phonepe: require("../../../../assets/phone-pay.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  amazon: require("../../../../assets/amazon.png") as number,
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   google: require("../../../../assets/google.png") as number,
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -107,17 +111,24 @@ export const QuestionCard = memo(function QuestionCard({
   index,
   onPressCard,
 }: QuestionCardProps) {
+  const cardRef = useRef<View>(null);
   const state = item.state ?? "locked";
   const cfg = BADGE_CFG[state];
   const isActive = state === "active";
   const isNext = state === "next";
-  const hasGlass = isActive || isNext;   // both PhonePe and Amazon get the glass effect
+  const hasGlass = isActive || isNext;
   const marginLeft = getMarginLeft(index);
+
+  function handlePress() {
+    cardRef.current?.measureInWindow((x, y, width, height) => {
+      onPressCard(item, { x, y, width, height });
+    });
+  }
 
   return (
     <View style={[styles.wrapper, { marginLeft }]}>
       <Pressable
-        onPress={() => onPressCard(item)}
+        onPress={handlePress}
         style={({ pressed }) => [pressed && styles.pressed]}
         accessibilityRole="button"
         accessibilityLabel={`Question ${item.questionNumber} ${item.companyName}`}
@@ -126,6 +137,8 @@ export const QuestionCard = memo(function QuestionCard({
 
           {/* ── Card ─────────────────────────────────────────── */}
           <View
+            ref={cardRef}
+            collapsable={false}
             style={[
               styles.greenCard,
               {

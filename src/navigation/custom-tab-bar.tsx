@@ -27,6 +27,12 @@ const STORE_ICON_COLOR = "#082f49"; // deep navy — darker icon
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
 
+    // Hide when any tab's nested navigator has pushed past its root screen
+    const isNestedDeep = state.routes.some(
+        (route) => route.state != null && (route.state.index ?? 0) > 0,
+    );
+    if (isNestedDeep) return null;
+
     const pillTabs = state.routes.filter((r) => r.name !== "StoreTab");
     const storeRoute = state.routes.find((r) => r.name === "StoreTab")!;
     const storeIndex = state.routes.indexOf(storeRoute);

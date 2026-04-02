@@ -1,28 +1,50 @@
 import { useCallback, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { HomeStackParamList } from "@/navigation/types";
-import { remoteImageWithHeaders } from "@/utils/remote-image";
 import questionsData from "@/mock-data/questions.json";
 import sessionResultData from "@/mock-data/session-result.json";
 import type { KeyMoment, Question, SessionResult } from "@/types/mock-data";
-import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
+import { palette } from "@/theme/colors";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "SessionResult">;
 
 const questions = questionsData as Question[];
 const sessionTemplate = sessionResultData as SessionResult;
 
-function formatDuration(totalSeconds: number): string {
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
+/** Company logo local assets — mirrors question-card.tsx */
+const LOCAL_LOGOS: Record<string, number> = {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  phonepe: require("../../../../assets/phone-pay.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  amazon: require("../../../../assets/amazon.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  google: require("../../../../assets/google.png") as number,
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  microsoft: require("../../../../assets/microsoft.png") as number,
+};
+
+// ── Design tokens ────────────────────────────────────────────────
+const GREEN_BG = "#DAF2E6";   // top section / question card
+const GREEN_DARK = "#1A8F50";   // question card gradient edge
+const PANEL_RADIUS = 28;
+const DIAMOND = "✦";         // bullet icon matching Figma
+
+function getLogoSource(companyId: string) {
+  return LOCAL_LOGOS[companyId] ?? null;
 }
 
 export function SessionResultScreen({ navigation, route }: Props) {
@@ -42,324 +64,375 @@ export function SessionResultScreen({ navigation, route }: Props) {
       questionText: question.text,
       companyName: question.companyName,
     }),
-    [question, sessionTemplate],
+    [question],
   );
+
+  const logoSource = getLogoSource(question.companyId);
 
   const renderMoment = useCallback(({ item }: { item: KeyMoment }) => {
     const isPositive = item.type === "positive";
     return (
       <View style={styles.momentRow}>
-        <Text style={[styles.timestamp, isPositive ? styles.tsPos : styles.tsNeg]}>
-          {item.timestamp}
-        </Text>
-        <Text style={styles.momentText}>{item.description}</Text>
+        <View style={[styles.momentDot, { backgroundColor: isPositive ? GREEN_BG : "#EF4444" }]} />
+        <View style={styles.momentContent}>
+          <Text style={styles.momentTime}>{item.timestamp}</Text>
+          <Text style={styles.momentText}>{item.description}</Text>
+        </View>
       </View>
     );
   }, []);
 
-  const durationLabel = formatDuration(session.audioDurationSeconds);
-
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.topBar}>
+    <View style={styles.root}>
+      {/* ── Green top section ─────────────────────────────────── */}
+      <View style={[styles.topSection, { paddingTop: insets.top + 12 }]}>
+        {/* Close button — solid green circle with white X */}
         <Pressable
+          style={styles.closeBtn}
+          onPress={() => navigation.goBack()}
           accessibilityRole="button"
           accessibilityLabel="Close"
-          onPress={() => navigation.goBack()}
-          hitSlop={12}
         >
-          <Ionicons name="close" size={28} color={colors.textPrimary} />
+          <Ionicons name="close" size={22} color="#fff" />
         </Pressable>
-      </View>
-      <View style={styles.avatarsRow}>
-        <Image
-          source={remoteImageWithHeaders("https://i.pravatar.cc/120?img=12")}
-          style={styles.avatar}
-          cachePolicy="memory-disk"
-          accessibilityIgnoresInvertColors
-        />
-        <Image
-          source={remoteImageWithHeaders("https://i.pravatar.cc/120?img=33")}
-          style={[styles.avatar, styles.avatarSecond]}
-          cachePolicy="memory-disk"
-          accessibilityIgnoresInvertColors
-        />
-        <View style={styles.checkWrap}>
-          <Ionicons name="checkmark-circle" size={28} color={colors.success} />
-        </View>
-      </View>
-      <View style={styles.questionCard}>
-        <Text style={styles.questionText}>{session.questionText}</Text>
-        <View style={styles.companyRow}>
-          <Image
-            source={remoteImageWithHeaders(question.companyLogoUrl)}
-            style={styles.companyLogo}
-            contentFit="contain"
-            cachePolicy="memory-disk"
-            accessibilityIgnoresInvertColors
-          />
-          <Text style={styles.companyLabel}>{session.companyName}</Text>
-        </View>
-      </View>
-      <View style={styles.tabs}>
-        <Pressable
-          onPress={() => setTab("summary")}
-          style={[styles.tab, tab === "summary" && styles.tabActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: tab === "summary" }}
-        >
-          <Text style={[styles.tabText, tab === "summary" && styles.tabTextActive]}>
-            Smart Summary
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setTab("moments")}
-          style={[styles.tab, tab === "moments" && styles.tabActive]}
-          accessibilityRole="tab"
-          accessibilityState={{ selected: tab === "moments" }}
-        >
-          <Text style={[styles.tabText, tab === "moments" && styles.tabTextActive]}>
-            Key Moments
-          </Text>
-        </Pressable>
-      </View>
-      {tab === "summary" ? (
-        <ScrollView
-          style={styles.summaryScrollView}
-          contentContainerStyle={styles.summaryScroll}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={styles.sectionTitle}>What worked well</Text>
-          {session.smartSummary.whatWorkedWell.map((line, i) => (
-            <View key={i} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.bulletText}>{line}</Text>
-            </View>
-          ))}
-          <Text style={[styles.sectionTitle, styles.sectionSpaced]}>Overall takeaways</Text>
-          {session.smartSummary.overallTakeaways.map((line, i) => (
-            <View key={i} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.bulletText}>{line}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      ) : (
-        <View style={styles.tabBody}>
-          <View style={styles.player}>
-            <Ionicons name="play-circle" size={40} color={colors.primary} />
-            <View style={styles.wave}>
-              <View style={[styles.waveBar, { height: 12 }]} />
-              <View style={[styles.waveBar, { height: 20 }]} />
-              <View style={[styles.waveBar, { height: 8 }]} />
-              <View style={[styles.waveBar, { height: 24 }]} />
-              <View style={[styles.waveBar, { height: 14 }]} />
-            </View>
-            <Text style={styles.durationText}>{durationLabel}</Text>
+
+        {/* Avatars from humans.png */}
+        <View style={styles.avatarsRow}>
+          {/* Left avatar */}
+          <View style={styles.avatarCircle}>
+            <Image
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              source={require("../../../../assets/humans.png")}
+              style={styles.humansImg}
+              contentFit="cover"
+              accessibilityIgnoresInvertColors
+            />
           </View>
+          {/* Right avatar — slightly offset */}
+          <View style={[styles.avatarCircle, styles.avatarRight]}>
+            <Image
+              // eslint-disable-next-line @typescript-eslint/no-var-requires
+              source={require("../../../../assets/humans.png")}
+              style={[styles.humansImg, styles.humansImgRight]}
+              contentFit="cover"
+              accessibilityIgnoresInvertColors
+            />
+          </View>
+        </View>
+
+        {/* Triangle pointing UP — sits between avatars and card, anchored to card top */}
+        <View style={styles.triangleBridge} />
+
+        {/* Question card */}
+        <View style={styles.questionCard}>
+          <Text style={styles.questionText}>{session.questionText}</Text>
+          <View style={styles.companyRow}>
+            {logoSource ? (
+              <Image
+                source={logoSource}
+                style={styles.companyLogo}
+                contentFit="contain"
+                accessibilityIgnoresInvertColors
+              />
+            ) : (
+              <View style={styles.companyLogoFallback} />
+            )}
+            <Text style={styles.companyLabel}>Asked by {session.companyName}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ── White content panel ───────────────────────────────── */}
+      <View style={styles.panel}>
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          <Pressable
+            style={[styles.tab, tab === "summary" && styles.tabActive]}
+            onPress={() => setTab("summary")}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: tab === "summary" }}
+          >
+            <Text style={[styles.tabText, tab === "summary" && styles.tabTextActive]}>
+              Smart summary
+            </Text>
+            {tab === "summary" && <View style={styles.tabUnderline} />}
+          </Pressable>
+
+          <Pressable
+            style={[styles.tab, tab === "moments" && styles.tabActive]}
+            onPress={() => setTab("moments")}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: tab === "moments" }}
+          >
+            <Text style={[styles.tabText, tab === "moments" && styles.tabTextActive]}>
+              Key moments
+            </Text>
+            {tab === "moments" && <View style={styles.tabUnderline} />}
+          </Pressable>
+        </View>
+
+        {/* Tab divider */}
+        <View style={styles.tabDivider} />
+
+        {/* Content */}
+        {tab === "summary" ? (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+          >
+            <Text style={styles.sectionTitle}>What worked well</Text>
+            {session.smartSummary.whatWorkedWell.map((line, i) => (
+              <View key={`w-${i}`} style={styles.bulletRow}>
+                <Text style={styles.bulletDiamond}>{DIAMOND}</Text>
+                <Text style={styles.bulletText}>{line}</Text>
+              </View>
+            ))}
+
+            <View style={styles.sectionDivider} />
+
+            <Text style={styles.sectionTitle}>Overall takeaways</Text>
+            {session.smartSummary.overallTakeaways.map((line, i) => (
+              <View key={`t-${i}`} style={styles.bulletRow}>
+                <Text style={styles.bulletDiamond}>{DIAMOND}</Text>
+                <Text style={styles.bulletText}>{line}</Text>
+              </View>
+            ))}
+          </ScrollView>
+        ) : (
           <FlashList
-            style={styles.momentsList}
             data={session.keyMoments}
             renderItem={renderMoment}
-            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-            contentContainerStyle={{ paddingBottom: insets.bottom + spacing.xl }}
+            keyExtractor={(item, i) => `${item.timestamp}-${i}`}
+            contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 40 }}
+            estimatedItemSize={72}
           />
-        </View>
-      )}
+        )}
+      </View>
     </View>
   );
 }
 
+const shadow = Platform.select({
+  ios: { shadowColor: "#000", shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+  android: { elevation: 6 },
+});
+
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: colors.backgroundFeedback,
+  root: { flex: 1, backgroundColor: GREEN_BG },
+
+  /* ── Green top ──────────────────────────────────────────── */
+  topSection: {
+    backgroundColor: GREEN_BG,
     paddingHorizontal: spacing.screenPadding,
+    alignItems: "center",
   },
-  topBar: {
-    alignItems: "flex-end",
-    marginBottom: spacing.s,
+
+  closeBtn: {
+    alignSelf: "flex-end",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#2DB56B",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
   },
+
+  /* Avatars */
   avatarsRow: {
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing.m,
-    position: "relative",
+    marginBottom: 16,
   },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#D4F4E1",
+    overflow: "hidden",
     borderWidth: 3,
-    borderColor: colors.background,
+    borderColor: "#fff",
   },
-  avatarSecond: {
-    marginLeft: -spacing.m,
+  avatarRight: {
+    marginLeft: -24,
+    zIndex: 0,
   },
-  checkWrap: {
-    position: "absolute",
-    right: "24%",
-    bottom: -4,
-    backgroundColor: colors.background,
-    borderRadius: 16,
+  humansImg: {
+    width: 200,
+    height: 100,
+    // show left half (male avatar)
+    left: 0,
   },
+  humansImgRight: {
+    // show right half (female avatar)
+    left: -100,
+  },
+
+  /* Question card */
   questionCard: {
-    backgroundColor: colors.successLight,
-    borderRadius: spacing.cardRadius,
-    borderWidth: 1,
-    borderColor: colors.success,
-    padding: spacing.cardPadding,
-    marginBottom: spacing.l,
+    width: "100%",
+    backgroundColor: "#13BF69",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 30,
   },
   questionText: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
-    lineHeight: 22,
-    marginBottom: spacing.s,
+    fontFamily: typography.fonts.inter.bold,
+    fontSize: 18,
+    color: "#fff",
+    lineHeight: 26,
+    textAlign: "center",
+    marginBottom: 12,
   },
   companyRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.s,
+    justifyContent: "center",
+    gap: 8,
   },
   companyLogo: {
-    width: 24,
-    height: 24,
-    borderRadius: spacing.xxs,
-    backgroundColor: colors.background,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#fff",
+  },
+  companyLogoFallback: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.4)",
   },
   companyLabel: {
     fontFamily: typography.fonts.inter.medium,
-    fontSize: typography.sizes.s,
-    color: colors.textSecondary,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.90)",
   },
+
+  /** Triangle pointing UP — anchored between avatars and top of question card */
+  triangleBridge: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 16,
+    borderRightWidth: 16,
+    borderBottomWidth: 16,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "#13BF69",
+    alignSelf: "center",
+    marginBottom: -3, // tuck flush into the card top
+  },
+
+  /* ── White panel ────────────────────────────────────────── */
+  panel: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: PANEL_RADIUS,
+    borderTopRightRadius: PANEL_RADIUS,
+    paddingTop: 8,
+    marginTop: -PANEL_RADIUS / 2,
+    ...shadow,
+  },
+
+  /* Tabs */
   tabs: {
     flexDirection: "row",
-    backgroundColor: colors.successLight,
-    borderRadius: spacing.m,
-    padding: spacing.xxs,
-    marginBottom: spacing.m,
+    paddingHorizontal: spacing.screenPadding,
+    paddingTop: 12,
   },
   tab: {
     flex: 1,
-    paddingVertical: spacing.s,
     alignItems: "center",
-    borderRadius: spacing.s,
+    paddingBottom: 10,
+    position: "relative",
   },
-  tabActive: {
-    backgroundColor: colors.background,
-    shadowColor: colors.textPrimary,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
-  },
+  tabActive: {},
   tabText: {
     fontFamily: typography.fonts.inter.medium,
-    fontSize: typography.sizes.s,
-    color: colors.textSecondary,
+    fontSize: 15,
+    color: palette.gray50,
   },
   tabTextActive: {
-    color: colors.textPrimary,
     fontFamily: typography.fonts.inter.semiBold,
+    color: "#0B0B0D",
   },
-  tabBody: {
-    flex: 1,
+  tabUnderline: {
+    position: "absolute",
+    bottom: 0,
+    left: "10%",
+    right: "10%",
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: "#0B0B0D",
   },
-  summaryScrollView: {
-    flex: 1,
+  tabDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: palette.gray20,
+    marginHorizontal: spacing.screenPadding,
+    marginBottom: 16,
   },
-  summaryScroll: {
-    paddingBottom: spacing.xxl,
-    flexGrow: 1,
+
+  /* Summary */
+  scrollContent: {
+    paddingHorizontal: spacing.screenPadding,
+    paddingTop: 4,
   },
   sectionTitle: {
     fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
-    marginBottom: spacing.s,
+    fontSize: 16,
+    color: "#0B0B0D",
+    marginBottom: 12,
   },
-  sectionSpaced: {
-    marginTop: spacing.l,
+  sectionDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: palette.gray20,
+    marginVertical: 20,
   },
   bulletRow: {
     flexDirection: "row",
-    gap: spacing.s,
-    marginBottom: spacing.s,
-    paddingRight: spacing.xs,
+    gap: 10,
+    marginBottom: 14,
+    alignItems: "flex-start",
   },
-  bullet: {
-    fontFamily: typography.fonts.inter.bold,
-    fontSize: typography.sizes.m,
-    color: colors.success,
-    lineHeight: 22,
+  bulletDiamond: {
+    fontSize: 11,
+    color: "#0B0B0D",
+    marginTop: 4,
   },
   bulletText: {
     flex: 1,
     fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
+    fontSize: 15,
+    color: "#0B0B0D",
     lineHeight: 22,
   },
-  player: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.m,
-    backgroundColor: colors.background,
-    borderRadius: spacing.cardRadius,
-    padding: spacing.m,
-    marginBottom: spacing.m,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  wave: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-    height: 28,
-    paddingHorizontal: spacing.xs,
-  },
-  waveBar: {
-    width: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
-    opacity: 0.85,
-  },
-  durationText: {
-    fontFamily: typography.fonts.inter.medium,
-    fontSize: typography.sizes.s,
-    color: colors.textSecondary,
-    minWidth: 40,
-  },
+
+  /* Key moments */
   momentRow: {
     flexDirection: "row",
-    gap: spacing.m,
-    paddingVertical: spacing.s,
+    gap: 12,
+    paddingHorizontal: spacing.screenPadding,
+    paddingVertical: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    borderBottomColor: palette.gray15,
+    alignItems: "flex-start",
   },
-  timestamp: {
+  momentDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 5,
+  },
+  momentContent: { flex: 1 },
+  momentTime: {
     fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.s,
-    minWidth: 48,
-  },
-  tsPos: {
-    color: colors.success,
-  },
-  tsNeg: {
-    color: colors.error,
+    fontSize: 12,
+    color: palette.gray60,
+    marginBottom: 2,
   },
   momentText: {
-    flex: 1,
     fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
+    fontSize: 15,
+    color: "#0B0B0D",
     lineHeight: 22,
-  },
-  momentsList: {
-    flex: 1,
   },
 });

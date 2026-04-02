@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import BottomSheet from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import { QuestionCard } from "@/features/home/components/question-card";
-import { QuestionDetailSheet } from "@/features/home/components/question-detail-sheet";
+import { QuestionPopover } from "@/features/home/components/question-popover";
+import type { CardLayout } from "@/features/home/components/question-popover";
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
 import type { Question } from "@/types/mock-data";
@@ -21,9 +21,6 @@ const questions = questionsData as Question[];
 
 /** Figma: shown after question 3 in the list */
 const SOCIAL_PROOF_AFTER_INDEX = 2;
-
-/** README: example practice set title (UI-only constant) */
-const PRACTICE_TITLE = "Practicing Top 50 Questions for\nBig Tech Companies";
 
 const headerShadow =
   Platform.OS === "ios"
@@ -47,26 +44,25 @@ function NotificationBadge({ count }: { count: number }) {
 
 export function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const sheetRef = useRef<BottomSheet>(null);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
-  const openSheet = useCallback((q: Question) => {
-    setSelectedQuestion(q);
-    requestAnimationFrame(() => {
-      sheetRef.current?.snapToIndex(0);
-    });
+  const [popoverQuestion, setPopoverQuestion] = useState<Question | null>(null);
+  const [popoverLayout, setPopoverLayout] = useState<CardLayout | null>(null);
+
+  const openPopover = useCallback((q: Question, layout: CardLayout) => {
+    setPopoverQuestion(q);
+    setPopoverLayout(layout);
   }, []);
 
-  const closeSheet = useCallback(() => {
-    setSelectedQuestion(null);
+  const closePopover = useCallback(() => {
+    setPopoverQuestion(null);
+    setPopoverLayout(null);
   }, []);
 
   const onFeedback = useCallback(() => {
-    const id = selectedQuestion?.id ?? "q1";
-    sheetRef.current?.close();
-    setSelectedQuestion(null);
+    const id = popoverQuestion?.id ?? "q1";
+    closePopover();
     navigation.navigate("SessionResult", { questionId: id });
-  }, [navigation, selectedQuestion?.id]);
+  }, [navigation, popoverQuestion?.id, closePopover]);
 
   const renderItem = useCallback(
     ({ item, index }: { item: Question; index: number }) => (
@@ -74,14 +70,14 @@ export function HomeScreen({ navigation }: Props) {
         <QuestionCard
           item={item}
           index={index}
-          onPressCard={openSheet}
+          onPressCard={openPopover}
         />
         {index === SOCIAL_PROOF_AFTER_INDEX && (
           <SocialProofBanner question={questions[SOCIAL_PROOF_AFTER_INDEX]} />
         )}
       </>
     ),
-    [openSheet],
+    [openPopover],
   );
 
   const listHeader = useMemo(
@@ -135,12 +131,12 @@ export function HomeScreen({ navigation }: Props) {
         estimatedItemSize={80}
       />
 
-      {/* Question detail bottom sheet */}
-      <QuestionDetailSheet
-        sheetRef={sheetRef}
-        question={selectedQuestion}
+      {/* Anchored popover */}
+      <QuestionPopover
+        question={popoverQuestion}
+        cardLayout={popoverLayout}
         onFeedback={onFeedback}
-        onClose={closeSheet}
+        onClose={closePopover}
       />
     </View>
   );
@@ -212,7 +208,6 @@ const styles = StyleSheet.create({
   },
 
   /* ── Practice card ──────────────────────────────────────── */
-  /** Figma: warm yellow card, H 44 Hug, padding 0 12, gap 12 */
   practiceCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -267,7 +262,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
   },
-  /** Dashed divider — achieved via borderStyle: 'dashed' */
   proofDash: {
     height: 0,
     borderBottomWidth: 1.5,
