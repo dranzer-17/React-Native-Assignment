@@ -11,7 +11,7 @@ import { QuestionDetailSheet } from "@/features/home/components/question-detail-
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
 import type { Question } from "@/types/mock-data";
-import { colors } from "@/theme/colors";
+import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
@@ -19,24 +19,35 @@ type Props = NativeStackScreenProps<HomeStackParamList, "Home">;
 
 const questions = questionsData as Question[];
 
-/** README Screen 4 — example practice set title (UI only; not mock JSON). */
-const PRACTICE_SET_CARD_TITLE =
-  "Practicing Top 50 Questions for Big Tech Companies";
+/** Figma: shown after question 3 in the list */
+const SOCIAL_PROOF_AFTER_INDEX = 2;
 
-const bannerShadow =
+/** README: example practice set title (UI-only constant) */
+const PRACTICE_TITLE = "Practicing Top 50 Questions for\nBig Tech Companies";
+
+const headerShadow =
   Platform.OS === "ios"
     ? {
-        shadowColor: colors.textPrimary,
-        shadowOffset: { width: 0, height: 2 },
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.06,
-        shadowRadius: 10,
+        shadowRadius: 4,
       }
     : { elevation: 2 };
+
+/** Figma: notification badge — green circle with lightning bolt + count */
+function NotificationBadge({ count }: { count: number }) {
+  return (
+    <View style={styles.notifBadge}>
+      <Ionicons name="flash" size={12} color="#fff" />
+      <Text style={styles.notifCount}>{count}</Text>
+    </View>
+  );
+}
 
 export function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<BottomSheet>(null);
-  const [practiceExpanded, setPracticeExpanded] = useState(true);
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
   const openSheet = useCallback((q: Question) => {
@@ -59,12 +70,16 @@ export function HomeScreen({ navigation }: Props) {
 
   const renderItem = useCallback(
     ({ item, index }: { item: Question; index: number }) => (
-      <QuestionCard
-        item={item}
-        index={index}
-        onPressCard={openSheet}
-        onPressStart={openSheet}
-      />
+      <>
+        <QuestionCard
+          item={item}
+          index={index}
+          onPressCard={openSheet}
+        />
+        {index === SOCIAL_PROOF_AFTER_INDEX && (
+          <SocialProofBanner question={questions[SOCIAL_PROOF_AFTER_INDEX]} />
+        )}
+      </>
     ),
     [openSheet],
   );
@@ -72,70 +87,55 @@ export function HomeScreen({ navigation }: Props) {
   const listHeader = useMemo(
     () => (
       <View style={styles.listTop}>
+        {/* Figma practice card: yellow background, muscle emoji, dropdown */}
         <Pressable
-          onPress={() => setPracticeExpanded((e) => !e)}
-          style={({ pressed }) => [
-            styles.practiceCard,
-            bannerShadow,
-            pressed && styles.practicePressed,
-          ]}
+          style={styles.practiceCard}
           accessibilityRole="button"
-          accessibilityLabel="Practice set card"
+          accessibilityLabel="Practice set"
         >
-          <View style={styles.practiceRow}>
-            <Text style={styles.practiceTitle} numberOfLines={practiceExpanded ? 3 : 2}>
-              {PRACTICE_SET_CARD_TITLE}
+          <Text style={styles.practiceEmoji}>💪</Text>
+          <View style={styles.practiceMeta}>
+            <Text style={styles.practiceSmall}>Practicing Top 50 Questions for</Text>
+            <Text style={styles.practiceBig} numberOfLines={1}>
+              Big Tech Companies
             </Text>
-            <Ionicons
-              name={practiceExpanded ? "chevron-up" : "chevron-down"}
-              size={22}
-              color={colors.textPrimary}
-            />
           </View>
-          {practiceExpanded ? (
-            <Text style={styles.practiceHint}>
-              Tap a company card to open the full prompt, duration, and feedback actions.
-            </Text>
-          ) : null}
+          <Ionicons name="chevron-down" size={20} color={palette.gray70} />
         </Pressable>
       </View>
     ),
-    [practiceExpanded],
+    [],
   );
 
   return (
     <View style={styles.root}>
-      <View style={[styles.header, { paddingTop: insets.top + spacing.s }]}>
+      {/* Header */}
+      <View style={[styles.header, headerShadow, { paddingTop: insets.top + spacing.s }]}>
         <ReadyAiLogo variant="header" />
         <View style={styles.headerActions}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Notifications"
-            style={styles.iconBtn}
-            hitSlop={8}
-          >
-            <Ionicons name="notifications-outline" size={24} color={colors.textPrimary} />
-            <View style={styles.badgeDot} />
-          </Pressable>
+          <NotificationBadge count={8} />
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Menu"
-            style={styles.iconBtn}
             hitSlop={8}
           >
-            <Ionicons name="menu-outline" size={26} color={colors.textPrimary} />
+            <Ionicons name="menu-outline" size={26} color={palette.gray90} />
           </Pressable>
         </View>
       </View>
+
+      {/* List */}
       <FlashList
-        style={styles.list}
         data={questions}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={listHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        estimatedItemSize={80}
       />
+
+      {/* Question detail bottom sheet */}
       <QuestionDetailSheet
         sheetRef={sheetRef}
         question={selectedQuestion}
@@ -146,14 +146,26 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
+/** Figma: yellow "X users completed Question N today" strip */
+function SocialProofBanner({ question }: { question: Question }) {
+  return (
+    <View style={styles.proofBanner}>
+      <Ionicons name="flag" size={14} color="#B8860B" style={styles.proofIcon} />
+      <Text style={styles.proofText}>
+        {question.completedTodayCount.toLocaleString()} users completed Question{" "}
+        {question.questionNumber} today
+      </Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: palette.gray10,
   },
-  list: {
-    flex: 1,
-  },
+
+  /* ── Header ─────────────────────────────────────────────── */
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -161,62 +173,94 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.screenPadding,
     paddingBottom: spacing.s,
     backgroundColor: colors.background,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
   },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
+    gap: spacing.s,
   },
-  iconBtn: {
-    padding: spacing.xs,
-    position: "relative",
+
+  /** Figma: green pill with ⚡ + count */
+  notifBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#3EBD70",
+    borderRadius: 20,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xxs,
+    gap: 3,
   },
-  badgeDot: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
+  notifCount: {
+    fontFamily: typography.fonts.inter.bold,
+    fontSize: 13,
+    color: "#fff",
+    includeFontPadding: false,
   },
+
+  /* ── List ───────────────────────────────────────────────── */
   listContent: {
     paddingHorizontal: spacing.screenPadding,
     paddingTop: spacing.m,
-    paddingBottom: spacing.giga,
+    paddingBottom: 120,
   },
   listTop: {
     marginBottom: spacing.s,
   },
+
+  /* ── Practice card ──────────────────────────────────────── */
+  /** Figma: warm yellow card, H 44 Hug, padding 0 12, gap 12 */
   practiceCard: {
-    backgroundColor: colors.cardBackground,
-    borderRadius: spacing.cardRadius,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    padding: spacing.cardPadding,
-  },
-  practicePressed: {
-    opacity: 0.97,
-  },
-  practiceRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing.s,
+    alignItems: "center",
+    backgroundColor: "#FFF3CD",
+    borderRadius: spacing.cardRadius,
+    paddingHorizontal: 12,
+    paddingVertical: spacing.s,
+    gap: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#B8860B",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+      },
+      android: { elevation: 2 },
+      default: {},
+    }),
   },
-  practiceTitle: {
-    flex: 1,
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
-    lineHeight: 22,
-  },
-  practiceHint: {
-    marginTop: spacing.s,
+  practiceEmoji: { fontSize: 22 },
+  practiceMeta: { flex: 1, minWidth: 0 },
+  practiceSmall: {
     fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.s,
-    color: colors.textSecondary,
-    lineHeight: 18,
+    fontSize: 11,
+    color: palette.gray60,
+    lineHeight: 14,
+  },
+  practiceBig: {
+    fontFamily: typography.fonts.inter.bold,
+    fontSize: typography.sizes.m,
+    color: palette.gray90,
+    lineHeight: 20,
+  },
+
+  /* ── Social proof banner ────────────────────────────────── */
+  /** Figma Yellow/50 = warm amber background strip */
+  proofBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF3CD",
+    borderRadius: spacing.xs,
+    paddingHorizontal: spacing.s,
+    paddingVertical: spacing.xs,
+    marginBottom: spacing.s,
+    gap: spacing.xxs,
+  },
+  proofIcon: { marginRight: 2 },
+  proofText: {
+    fontFamily: typography.fonts.inter.semiBold,
+    fontSize: typography.sizes.xs,
+    color: "#B8860B",
+    letterSpacing: 0.2,
+    flex: 1,
   },
 });

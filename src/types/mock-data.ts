@@ -13,6 +13,8 @@ export interface Question {
   text: string;
   durationMinutes: number;
   completedTodayCount: number;
+  /** "active" = current, "next" = unlocked/up next, "locked" = future */
+  state: "active" | "next" | "locked";
 }
 
 export interface KeyMoment {

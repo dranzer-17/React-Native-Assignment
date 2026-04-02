@@ -2,11 +2,56 @@
   {
     "id": "q1",
     "questionNumber": 1,
-    "companyId": "1",
+    "companyId": "phonepe",
     "companyName": "PhonePe",
     "companyLogoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png",
     "text": "API latency is variable & app is sluggish. How do you design UI safely?",
     "durationMinutes": 2,
-    "completedTodayCount": 2312
+    "completedTodayCount": 2312,
+    "state": "active"
+  },
+  {
+    "id": "q2",
+    "questionNumber": 2,
+    "companyId": "amazon",
+    "companyName": "Amazon",
+    "companyLogoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/603px-Amazon_logo.svg.png",
+    "text": "Design a scalable notification system for millions of users with different time zones.",
+    "durationMinutes": 3,
+    "completedTodayCount": 1856,
+    "state": "next"
+  },
+  {
+    "id": "q3",
+    "questionNumber": 3,
+    "companyId": "phonepe",
+    "companyName": "PhonePe",
+    "companyLogoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/PhonePe_Logo.svg/512px-PhonePe_Logo.svg.png",
+    "text": "How would you implement an offline-first payments experience with data sync?",
+    "durationMinutes": 2,
+    "completedTodayCount": 2312,
+    "state": "locked"
+  },
+  {
+    "id": "q4",
+    "questionNumber": 4,
+    "companyId": "google",
+    "companyName": "Google",
+    "companyLogoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png",
+    "text": "Walk me through how you would design the search autocomplete feature at scale.",
+    "durationMinutes": 4,
+    "completedTodayCount": 3100,
+    "state": "locked"
+  },
+  {
+    "id": "q5",
+    "questionNumber": 5,
+    "companyId": "microsoft",
+    "companyName": "Microsoft",
+    "companyLogoUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/512px-Microsoft_logo.svg.png",
+    "text": "How do you approach accessibility in a large enterprise product used globally?",
+    "durationMinutes": 3,
+    "completedTodayCount": 2100,
+    "state": "locked"
   }
 ]
