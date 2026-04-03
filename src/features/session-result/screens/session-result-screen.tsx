@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -7,7 +7,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,10 +14,10 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
 import sessionResultData from "@/mock-data/session-result.json";
-import type { KeyMoment, Question, SessionResult } from "@/types/mock-data";
+import type { Question, SessionResult } from "@/types/mock-data";
+import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
-import { palette } from "@/theme/colors";
 
 type Props = NativeStackScreenProps<HomeStackParamList, "SessionResult">;
 
@@ -43,6 +42,18 @@ const GREEN_DARK = "#1A8F50";   // question card gradient edge
 const PANEL_RADIUS = 28;
 const DIAMOND = "✦";         // bullet icon matching Figma
 
+/** Key moments tab — design tokens (Figma-style) */
+const KM_PLAYER_BG = palette.orange10;
+const KM_PROGRESS_TRACK = palette.orange20;
+const KM_TIMESTAMP_BLUE = "#2563EB";
+const KM_SELECTION_BORDER = "#93C5FD";
+
+function formatMmSs(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 function getLogoSource(companyId: string) {
   return LOCAL_LOGOS[companyId] ?? null;
 }
@@ -51,6 +62,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { questionId } = route.params;
   const [tab, setTab] = useState<"summary" | "moments">("summary");
+  const [selectedMomentIndex, setSelectedMomentIndex] = useState(0);
 
   const question = useMemo(
     () => questions.find((q) => q.id === questionId) ?? questions[0],
@@ -69,18 +81,9 @@ export function SessionResultScreen({ navigation, route }: Props) {
 
   const logoSource = getLogoSource(question.companyId);
 
-  const renderMoment = useCallback(({ item }: { item: KeyMoment }) => {
-    const isPositive = item.type === "positive";
-    return (
-      <View style={styles.momentRow}>
-        <View style={[styles.momentDot, { backgroundColor: isPositive ? GREEN_BG : "#EF4444" }]} />
-        <View style={styles.momentContent}>
-          <Text style={styles.momentTime}>{item.timestamp}</Text>
-          <Text style={styles.momentText}>{item.description}</Text>
-        </View>
-      </View>
-    );
-  }, []);
+  const durationLabel = formatMmSs(session.audioDurationSeconds);
+  /** Static mock progress ratio for the bar (0–1) */
+  const progressRatio = 0.18;
 
   return (
     <View style={styles.root}>
@@ -199,13 +202,60 @@ export function SessionResultScreen({ navigation, route }: Props) {
             ))}
           </ScrollView>
         ) : (
-          <FlashList
-            data={session.keyMoments}
-            renderItem={renderMoment}
-            keyExtractor={(item, i) => `${item.timestamp}-${i}`}
-            contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 40 }}
-            estimatedItemSize={72}
-          />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.momentsScroll,
+              { paddingBottom: insets.bottom + 40 },
+            ]}
+          >
+            {/* Mock interview player card */}
+            <View style={styles.playerCard}>
+              <Pressable
+                style={styles.playBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Play mock interview"
+              >
+                <Ionicons name="play" size={22} color={colors.primary} />
+              </Pressable>
+              <View style={styles.playerMeta}>
+                <Text style={styles.playerTitle}>Mock Interview</Text>
+                <View style={styles.progressTrack}>
+                  <View
+                    style={[styles.progressFill, { width: `${progressRatio * 100}%` }]}
+                  />
+                </View>
+                <View style={styles.timeRow}>
+                  <Text style={styles.timeLabel}>00:00</Text>
+                  <Text style={styles.timeLabel}>{durationLabel}</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Key moments list */}
+            {session.keyMoments.map((item, i) => {
+              const selected = i === selectedMomentIndex;
+              return (
+                <Pressable
+                  key={`${item.timestamp}-${i}`}
+                  onPress={() => setSelectedMomentIndex(i)}
+                  style={styles.momentRow}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                >
+                  <View
+                    style={[
+                      styles.momentInner,
+                      selected && styles.momentInnerSelected,
+                    ]}
+                  >
+                    <Text style={styles.momentTime}>{item.timestamp}</Text>
+                    <Text style={styles.momentText}>{item.description}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         )}
       </View>
     </View>
@@ -277,8 +327,8 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   questionText: {
-    fontFamily: typography.fonts.inter.bold,
-    fontSize: 18,
+    fontFamily: typography.fonts.manrope.bold,
+    fontSize: 14,
     color: "#fff",
     lineHeight: 26,
     textAlign: "center",
@@ -406,31 +456,80 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 
-  /* Key moments */
-  momentRow: {
-    flexDirection: "row",
-    gap: 12,
+  /* Key moments tab */
+  momentsScroll: {
     paddingHorizontal: spacing.screenPadding,
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: palette.gray15,
-    alignItems: "flex-start",
+    paddingTop: 8,
   },
-  momentDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginTop: 5,
+  playerCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: KM_PLAYER_BG,
+    borderRadius: 16,
+    padding: spacing.m,
+    gap: spacing.m,
+    marginBottom: spacing.m,
   },
-  momentContent: { flex: 1 },
-  momentTime: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: 12,
+  playBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: palette.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  playerMeta: { flex: 1, minWidth: 0 },
+  playerTitle: {
+    fontFamily: typography.fonts.manrope.bold,
+    fontSize: 15,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  progressTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: KM_PROGRESS_TRACK,
+    overflow: "hidden",
+    marginBottom: spacing.xxs,
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: colors.primary,
+  },
+  timeRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  timeLabel: {
+    fontFamily: typography.fonts.manrope.medium,
+    fontSize: 11,
     color: palette.gray60,
-    marginBottom: 2,
+  },
+  momentRow: {
+    paddingVertical: spacing.m,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: palette.gray20,
+  },
+  momentInner: {
+    paddingHorizontal: spacing.xxs,
+  },
+  momentInnerSelected: {
+    borderWidth: 1,
+    borderColor: KM_SELECTION_BORDER,
+    borderStyle: "dashed",
+    borderRadius: 8,
+    paddingHorizontal: spacing.s,
+    paddingVertical: spacing.xs,
+  },
+  momentTime: {
+    fontFamily: typography.fonts.manrope.semiBold,
+    fontSize: 13,
+    color: KM_TIMESTAMP_BLUE,
+    marginBottom: 4,
   },
   momentText: {
-    fontFamily: typography.fonts.inter.normal,
+    fontFamily: typography.fonts.manrope.regular,
     fontSize: 15,
     color: "#0B0B0D",
     lineHeight: 22,

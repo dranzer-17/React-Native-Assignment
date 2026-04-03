@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import { colors } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
@@ -9,8 +8,7 @@ export function StoreScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + spacing.xl }]}>
-      <ReadyAiLogo variant="header" centered style={styles.brand} />
+    <View style={[styles.root, { paddingTop: insets.top + spacing.l }]}>
       <Text style={styles.title}>Store</Text>
       <Text style={styles.body}>
         README: third tab matches the Figma shell — add store content when you wire product data.
@@ -25,9 +23,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: spacing.screenPadding,
     alignItems: "center",
-  },
-  brand: {
-    marginBottom: spacing.l,
   },
   title: {
     fontFamily: typography.fonts.inter.bold,

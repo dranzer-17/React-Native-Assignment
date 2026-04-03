@@ -8,7 +8,7 @@ import { spacing } from "@/theme/spacing";
  * Variants:
  * - **splash**  — before Get Started: Ready 46.96 px, ai 31.3 × 31.3
  * - **landing** — Welcome / Get Started page: Ready 36 px, ai 26 × 26
- * - **header**  — Home / Store bar (scaled down from landing at 0.62×)
+ * - **header**  — Home top bar (scaled down from landing at 0.62×)
  */
 
 const ONEST_EXTRA_BOLD = "Onest_800ExtraBold";
@@ -56,13 +56,46 @@ function getSpec(variant: LogoVariant) {
 interface ReadyAiLogoProps extends ViewProps {
   variant?: LogoVariant;
   centered?: boolean;
+  /** When false, shows “Ready!” only (no “ai” tile). */
+  withAiTile?: boolean;
 }
 
-export function ReadyAiLogo({ variant = "landing", centered = false, style, ...rest }: ReadyAiLogoProps) {
+export function ReadyAiLogo({
+  variant = "landing",
+  centered = false,
+  withAiTile = true,
+  style,
+  ...rest
+}: ReadyAiLogoProps) {
   const spec = getSpec(variant);
   const { readySize: rs, readyLineHeight: rlh, readyWidth: rw, readyLetterSpacing: rls } = spec;
   const { aiBox, aiSize: as } = spec;
   const rCorner = Math.min(AI_RADIUS, Math.floor(aiBox / 2.5));
+
+  if (!withAiTile) {
+    return (
+      <View
+        accessibilityLabel="Ready!"
+        style={[styles.row, centered && styles.rowCenter, style]}
+        {...rest}
+      >
+        <View style={[styles.readyWrap, styles.readyOnlyWrap, { minHeight: rlh }]}>
+          <Text
+            style={[
+              styles.readyText,
+              {
+                fontSize: rs,
+                lineHeight: rlh,
+                letterSpacing: rls,
+              },
+            ]}
+          >
+            Ready!
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View
@@ -116,6 +149,9 @@ const styles = StyleSheet.create({
   },
   rowCenter: {
     alignSelf: "center",
+  },
+  readyOnlyWrap: {
+    marginRight: 0,
   },
   readyWrap: {
     justifyContent: "center",

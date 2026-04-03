@@ -41,4 +41,6 @@ export interface User {
   name: string;
   phone: string;
   avatarUrl: string;
+  /** Shown on profile as "Learning since" */
+  learningSince: string;
 }

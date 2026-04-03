@@ -3,16 +3,19 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "start": "expo start --dev-client",
+    "start": "ELECTRON_DISABLE_SANDBOX=1 expo start --dev-client",
     "android": "expo run:android",
+    "android:device": "expo run:android --device",
     "ios": "expo run:ios",
-    "prebuild:clean": "npx expo prebuild --clean",
+    "ios:device": "expo run:ios --device",
+    "prebuild:clean": "expo prebuild --clean",
     "build:android:preview": "eas build --profile preview --platform android",
     "build:ios:preview": "eas build --profile preview --platform ios",
     "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.1",
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@expo-google-fonts/onest": "^0.4.1",
     "@expo/vector-icons": "15.1.1",
     "@gorhom/bottom-sheet": "^5.2.6",

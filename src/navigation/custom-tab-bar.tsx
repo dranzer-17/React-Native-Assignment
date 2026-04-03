@@ -1,8 +1,9 @@
 import { Pressable, StyleSheet, Text, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { palette } from "@/theme/colors";
+import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
 /** Figma spec */
@@ -13,11 +14,25 @@ const GAP = 8;
 
 type TabName = "HomeTab" | "SettingsTab" | "StoreTab";
 
-const TAB_META: Record<TabName, { iconActive: string; iconInactive: string; label: string }> = {
-    HomeTab: { iconActive: "home", iconInactive: "home-outline", label: "Home" },
-    SettingsTab: { iconActive: "options", iconInactive: "options-outline", label: "Settings" },
-    StoreTab: { iconActive: "bag", iconInactive: "bag-outline", label: "Store" },
+const TAB_META: Record<TabName, { label: string }> = {
+    HomeTab: { label: "Home" },
+    SettingsTab: { label: "Settings" },
+    StoreTab: { label: "Store" },
 };
+
+const PILL_ICON_SIZE = 22;
+
+/** Feather icons (Lucide lineage); font-based like Ionicons — stable on Android Fabric. */
+function PillTabIcon({
+    routeName,
+    color,
+}: {
+    routeName: "HomeTab" | "SettingsTab";
+    color: string;
+}) {
+    const name = routeName === "HomeTab" ? "home" : "settings";
+    return <Feather name={name} size={PILL_ICON_SIZE} color={color} />;
+}
 
 const ACTIVE_COLOR = "#F97316";   // Orange/50
 const INACTIVE_COLOR = palette.gray60;
@@ -33,6 +48,10 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     );
     if (isNestedDeep) return null;
 
+    // Settings is a full-screen profile flow — no Home / Settings / Store pill
+    const activeRoute = state.routes[state.index];
+    if (activeRoute?.name === "SettingsTab") return null;
+
     const pillTabs = state.routes.filter((r) => r.name !== "StoreTab");
     const storeRoute = state.routes.find((r) => r.name === "StoreTab")!;
     const storeIndex = state.routes.indexOf(storeRoute);
@@ -46,7 +65,12 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     }
 
     return (
-        <View style={[styles.wrapper, { paddingBottom: insets.bottom || 16 }]}>
+        <View
+            style={[
+                styles.wrapper,
+                { paddingBottom: (insets.bottom || 16) + spacing.l },
+            ]}
+        >
             <View style={styles.row}>
 
                 {/* ── Pill: Home + Settings ───────────────────────────── */}
@@ -55,7 +79,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                         const isFocused = state.index === state.routes.indexOf(route);
                         const meta = TAB_META[route.name as TabName];
                         const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
-                        const icon = isFocused ? meta.iconActive : meta.iconInactive;
+                        const pillName = route.name as "HomeTab" | "SettingsTab";
 
                         return (
                             <Pressable
@@ -66,8 +90,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                                 accessibilityLabel={meta.label}
                                 style={styles.pillTab}
                             >
-                                {/* No background circle — just tint icon + label */}
-                                <Ionicons name={icon as any} size={22} color={color} />
+                                <PillTabIcon routeName={pillName} color={color} />
                                 <Text style={[styles.label, { color }]}>{meta.label}</Text>
                             </Pressable>
                         );

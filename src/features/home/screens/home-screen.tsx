@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,21 +22,15 @@ const questions = questionsData as Question[];
 /** Figma: shown after question 3 in the list */
 const SOCIAL_PROOF_AFTER_INDEX = 2;
 
-const headerShadow =
-  Platform.OS === "ios"
-    ? {
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 4,
-    }
-    : { elevation: 2 };
+const MENU_ICON_SIZE = 24;
+const MENU_CIRCLE = 40;
+const FLASH_ICON_SIZE = 14;
 
-/** Figma: notification badge — green circle with lightning bolt + count */
+/** Figma: notification badge — green pill with lightning + count */
 function NotificationBadge({ count }: { count: number }) {
   return (
     <View style={styles.notifBadge}>
-      <Ionicons name="flash" size={12} color="#fff" />
+      <Ionicons name="flash" size={FLASH_ICON_SIZE} color="#fff" />
       <Text style={styles.notifCount}>{count}</Text>
     </View>
   );
@@ -82,45 +76,56 @@ export function HomeScreen({ navigation }: Props) {
 
   const listHeader = useMemo(
     () => (
-      <View style={styles.listTop}>
-        {/* Figma practice card: yellow background, muscle emoji, dropdown */}
-        <Pressable
-          style={styles.practiceCard}
-          accessibilityRole="button"
-          accessibilityLabel="Practice set"
+      <View>
+        <View
+          style={[
+            styles.listHeaderBar,
+            {
+              paddingTop: insets.top + spacing.l + spacing.xs,
+              marginHorizontal: -spacing.screenPadding,
+            },
+          ]}
         >
-          <Text style={styles.practiceEmoji}>💪</Text>
-          <View style={styles.practiceMeta}>
-            <Text style={styles.practiceSmall}>Practicing Top 50 Questions for</Text>
-            <Text style={styles.practiceBig} numberOfLines={1}>
-              Big Tech Companies
-            </Text>
+          <View style={styles.headerCluster}>
+            <View style={styles.readyScale}>
+              <ReadyAiLogo variant="header" withAiTile={false} />
+            </View>
+            <View style={styles.headerRight}>
+              <NotificationBadge count={8} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Menu"
+                hitSlop={8}
+                style={({ pressed }) => [styles.menuCircle, pressed && styles.menuCirclePressed]}
+              >
+                <Ionicons name="menu-outline" size={MENU_ICON_SIZE} color={palette.gray90} />
+              </Pressable>
+            </View>
           </View>
-          <Ionicons name="chevron-down" size={20} color={palette.gray70} />
-        </Pressable>
+        </View>
+        <View style={styles.listTop}>
+          <Pressable
+            style={styles.practiceCard}
+            accessibilityRole="button"
+            accessibilityLabel="Practice set"
+          >
+            <Text style={styles.practiceEmoji}>💪</Text>
+            <View style={styles.practiceMeta}>
+              <Text style={styles.practiceSmall}>Practicing Top 50 Questions for</Text>
+              <Text style={styles.practiceBig} numberOfLines={1}>
+                Big Tech Companies
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={20} color={palette.gray70} />
+          </Pressable>
+        </View>
       </View>
     ),
-    [],
+    [insets.top],
   );
 
   return (
     <View style={styles.root}>
-      {/* Header */}
-      <View style={[styles.header, headerShadow, { paddingTop: insets.top + spacing.s }]}>
-        <ReadyAiLogo variant="header" />
-        <View style={styles.headerActions}>
-          <NotificationBadge count={8} />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Menu"
-            hitSlop={8}
-          >
-            <Ionicons name="menu-outline" size={26} color={palette.gray90} />
-          </Pressable>
-        </View>
-      </View>
-
-      {/* List */}
       <FlashList
         data={questions}
         renderItem={renderItem}
@@ -128,10 +133,8 @@ export function HomeScreen({ navigation }: Props) {
         ListHeaderComponent={listHeader}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        estimatedItemSize={80}
       />
 
-      {/* Anchored popover */}
       <QuestionPopover
         question={popoverQuestion}
         cardLayout={popoverLayout}
@@ -162,37 +165,58 @@ function SocialProofBanner({ question }: { question: Question }) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: palette.gray10,
+    backgroundColor: colors.background,
   },
 
-  /* ── Header ─────────────────────────────────────────────── */
-  header: {
+  /** Scrolls with list — full-bleed bar, same row as cards content below */
+  listHeaderBar: {
+    backgroundColor: colors.background,
+    paddingHorizontal: spacing.screenPadding,
+    paddingBottom: 2,
+    marginBottom: 7,
+  },
+  headerCluster: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: spacing.screenPadding,
-    paddingBottom: spacing.s,
-    backgroundColor: colors.background,
+    width: "100%",
+    paddingTop: spacing.s,
   },
-  headerActions: {
+  readyScale: {
+    transform: [{ scale: 1.12 }],
+  },
+  headerRight: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.s,
   },
+  menuCircle: {
+    width: MENU_CIRCLE,
+    height: MENU_CIRCLE,
+    borderRadius: MENU_CIRCLE / 2,
+    backgroundColor: palette.gray20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuCirclePressed: {
+    opacity: 0.88,
+    backgroundColor: palette.gray30,
+  },
 
-  /** Figma: green pill with ⚡ + count */
+  /** Green pill — ⚡ + count */
   notifBadge: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#3EBD70",
     borderRadius: 20,
-    paddingHorizontal: spacing.xs,
-    paddingVertical: spacing.xxs,
-    gap: 3,
+    paddingHorizontal: spacing.s,
+    paddingVertical: spacing.xs + 1,
+    gap: 4,
+    minHeight: 36,
   },
   notifCount: {
     fontFamily: typography.fonts.inter.bold,
-    fontSize: 13,
+    fontSize: 15,
     color: "#fff",
     includeFontPadding: false,
   },
@@ -200,8 +224,9 @@ const styles = StyleSheet.create({
   /* ── List ───────────────────────────────────────────────── */
   listContent: {
     paddingHorizontal: spacing.screenPadding,
-    paddingTop: spacing.m,
-    paddingBottom: 120,
+    paddingTop: 0,
+    paddingBottom: 148,
+    backgroundColor: colors.background,
   },
   listTop: {
     marginBottom: spacing.s,

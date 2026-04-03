@@ -16,6 +16,14 @@ export const typography = {
       semiBold: "Inter_600SemiBold",
       bold: "Inter_700Bold",
     },
+    /** Loaded in App.tsx via @expo-google-fonts/manrope (internal names Manrope_*). */
+    manrope: {
+      regular: "Manrope_400Regular",
+      medium: "Manrope_500Medium",
+      semiBold: "Manrope_600SemiBold",
+      bold: "Manrope_700Bold",
+      extraBold: "Manrope_800ExtraBold",
+    },
     system: Platform.select({
       ios: "System",
       android: "Roboto",

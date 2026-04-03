@@ -7,7 +7,6 @@ import { remoteImageWithHeaders } from "@/utils/remote-image";
 import { palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
-
 import type { CardLayout } from "@/features/home/components/question-popover";
 
 export interface QuestionCardProps {

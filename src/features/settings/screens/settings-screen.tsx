@@ -1,95 +1,162 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Button } from "@/components/ui/button";
 import { navigateToWelcome } from "@/navigation/root-navigation-ref";
+import type { MainTabParamList } from "@/navigation/types";
 import userData from "@/mock-data/user.json";
 import type { User } from "@/types/mock-data";
-import { colors } from "@/theme/colors";
+import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
 const user = userData as User;
 
-interface MenuRowProps {
+// Full promo card asset (background, copy, character, CTA) — 714×406
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const TRIAL_BANNER_PNG = require("../../../../assets/profile.png") as number;
+const TRIAL_BANNER_ASPECT = 714 / 406;
+
+const PROFILE_DOWNLOAD_BG = "#DCFCE7";
+
+type TabNav = BottomTabNavigationProp<MainTabParamList>;
+
+interface ActionRowProps {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
-  value?: string;
-  showDot?: boolean;
   onPress?: () => void;
+  destructive?: boolean;
 }
 
-function MenuRow({ icon, label, value, showDot, onPress }: MenuRowProps) {
+function ActionRow({ icon, label, onPress, destructive }: ActionRowProps) {
   return (
     <Pressable
       onPress={onPress}
-      style={({ pressed }) => [styles.menuRow, pressed && styles.menuRowPressed]}
+      style={({ pressed }) => [styles.actionRow, pressed && styles.rowPressed]}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <View style={styles.menuIconWrap}>
-        <Ionicons name={icon} size={22} color={colors.textPrimary} />
+      <View style={styles.actionIconWrap}>
+        <Ionicons
+          name={icon}
+          size={20}
+          color={destructive ? colors.error : palette.gray70}
+        />
       </View>
-      <View style={styles.menuTextWrap}>
-        <Text style={styles.menuLabel}>{label}</Text>
-        {value ? <Text style={styles.menuValue}>{value}</Text> : null}
-      </View>
-      {showDot ? <View style={styles.menuDot} /> : null}
-      <Ionicons name="chevron-forward" size={18} color={colors.textDisabled} />
+      <Text
+        style={[styles.actionLabel, destructive && styles.actionLabelDestructive]}
+      >
+        {label}
+      </Text>
+      <Ionicons name="chevron-forward" size={18} color={palette.gray40} />
     </Pressable>
   );
 }
 
 export function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<TabNav>();
+
+  const onTrialCta = () => {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
 
   return (
     <ScrollView
       style={styles.root}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: insets.top + spacing.m, paddingBottom: insets.bottom + spacing.xl },
+        {
+          paddingTop: insets.top + spacing.s,
+          paddingBottom: insets.bottom + spacing.xl,
+        },
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.screenTitle}>Your Profile</Text>
-      <View style={styles.profileCard}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Pressable
+          onPress={() => navigation.navigate("HomeTab")}
+          style={({ pressed }) => [styles.headerSide, pressed && styles.headerPressed]}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
+          <Ionicons name="chevron-back" size={26} color={palette.gray90} />
+        </Pressable>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          Your Profile
+        </Text>
+        <View style={styles.headerSide} />
+      </View>
+
+      {/* Trial promo — single PNG (replace asset in assets/profile.png to update design) */}
+      <Pressable
+        onPress={onTrialCta}
+        style={({ pressed }) => [styles.trialBannerPress, pressed && styles.trialBannerPressed]}
+        accessibilityRole="button"
+        accessibilityLabel="Start 3 days trial for 1 rupee"
+      >
         <Image
-          source={{ uri: user.avatarUrl }}
-          style={styles.avatar}
-          cachePolicy="memory-disk"
+          source={TRIAL_BANNER_PNG}
+          style={styles.trialBannerImage}
+          contentFit="cover"
           accessibilityIgnoresInvertColors
         />
-        <View style={styles.profileMeta}>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.phone}>{user.phone}</Text>
+      </Pressable>
+
+      {/* Update available */}
+      <View style={styles.outlineCard}>
+        <Ionicons name="grid-outline" size={22} color={palette.gray70} />
+        <Text style={styles.updateLabel}>New update available</Text>
+        <Pressable
+          style={({ pressed }) => [
+            styles.downloadBtn,
+            pressed && styles.downloadBtnPressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel="Download update"
+        >
+          <Ionicons name="download-outline" size={18} color={palette.green60} />
+        </Pressable>
+      </View>
+
+      {/* Phone + learning since */}
+      <View style={styles.outlineCardStack}>
+        <View style={styles.infoRow}>
+          <Ionicons name="call-outline" size={20} color={palette.gray70} />
+          <Text style={styles.infoLabel}>Phone number</Text>
+          <Text style={styles.infoValue}>{user.phone}</Text>
+        </View>
+        <View style={styles.rowDivider} />
+        <View style={styles.infoRow}>
+          <Ionicons name="calendar-outline" size={20} color={palette.gray70} />
+          <Text style={styles.infoLabel}>Learning since</Text>
+          <Text style={styles.infoValue}>{user.learningSince}</Text>
         </View>
       </View>
-      <Button label="Sign up / Continue" onPress={() => undefined} style={styles.cta} />
-      <View style={styles.promo}>
-        <Text style={styles.promoTitle}>3 days free trial for ₹1</Text>
-        <Text style={styles.promoSub}>Unlock full paths and detailed AI feedback.</Text>
-        <Button label="START 3 DAYS TRIAL @ ₹1" onPress={() => undefined} style={styles.promoBtn} />
+
+      {/* Actions */}
+      <View style={styles.outlineCardStack}>
+        <ActionRow icon="chatbubble-ellipses-outline" label="Chat with us" />
+        <View style={styles.rowDivider} />
+        <ActionRow icon="share-outline" label="Share the app" />
+        <View style={styles.rowDivider} />
+        <ActionRow icon="star-outline" label="Rate the app" />
+        <View style={styles.rowDivider} />
+        <ActionRow
+          icon="log-out-outline"
+          label="Log out"
+          destructive
+          onPress={() => navigateToWelcome()}
+        />
       </View>
-      <View style={styles.menu}>
-        <MenuRow icon="sparkles-outline" label="New update available" showDot />
-        <MenuRow icon="call-outline" label="Phone number" value={user.phone} />
-        <MenuRow icon="time-outline" label="Last log in" value="August 17, 2023" />
-        <MenuRow icon="chatbubble-ellipses-outline" label="Chat with us" />
-        <MenuRow icon="share-social-outline" label="Share the app" />
-        <MenuRow icon="star-outline" label="Rate the app" />
-      </View>
-      <Pressable
-        onPress={() => navigateToWelcome()}
-        style={({ pressed }) => [styles.logout, pressed && styles.menuRowPressed]}
-        accessibilityRole="button"
-        accessibilityLabel="Log out"
-      >
-        <Ionicons name="log-out-outline" size={22} color={colors.error} />
-        <Text style={styles.logoutText}>Log Out</Text>
-      </Pressable>
-      <Text style={styles.footer}>App version 2.0.1 · Made with care in India</Text>
+
+      <Text style={styles.footer}>
+        App version v2.14.2{"\n"}Made with ❤️ from India
+      </Text>
     </ScrollView>
   );
 }
@@ -97,130 +164,142 @@ export function SettingsScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: palette.gray15,
   },
   content: {
     paddingHorizontal: spacing.screenPadding,
   },
-  screenTitle: {
-    fontFamily: typography.fonts.inter.bold,
-    fontSize: typography.sizes.xl,
-    color: colors.textPrimary,
-    marginBottom: spacing.l,
-  },
-  profileCard: {
+
+  header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.m,
-    marginBottom: spacing.l,
-  },
-  avatar: {
-    width: spacing.avatarSize,
-    height: spacing.avatarSize,
-    borderRadius: spacing.avatarSize / 2,
-    backgroundColor: colors.backgroundSecondary,
-  },
-  profileMeta: {
-    flex: 1,
-  },
-  name: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.l,
-    color: colors.textPrimary,
-    marginBottom: spacing.xxxs,
-  },
-  phone: {
-    fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.m,
-    color: colors.textSecondary,
-  },
-  cta: {
-    marginBottom: spacing.xl,
-  },
-  promo: {
-    backgroundColor: colors.textPrimary,
-    borderRadius: spacing.cardRadius,
-    padding: spacing.cardPadding,
-    marginBottom: spacing.xl,
-  },
-  promoTitle: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.m,
-    color: colors.textInverse,
-    marginBottom: spacing.xs,
-  },
-  promoSub: {
-    fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.s,
-    color: colors.textInverse,
-    opacity: 0.72,
     marginBottom: spacing.m,
-    lineHeight: 18,
   },
-  promoBtn: {
-    backgroundColor: colors.primary,
+  headerSide: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  menu: {
-    borderRadius: spacing.cardRadius,
-    borderWidth: 1,
-    borderColor: colors.border,
+  headerPressed: {
+    opacity: 0.6,
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: "center",
+    fontFamily: typography.fonts.manrope.bold,
+    fontSize: 18,
+    color: palette.gray90,
+  },
+
+  trialBannerPress: {
+    width: "100%",
+    borderRadius: 22,
     overflow: "hidden",
-    marginBottom: spacing.l,
+    marginBottom: spacing.m,
   },
-  menuRow: {
+  trialBannerPressed: {
+    opacity: 0.96,
+  },
+  trialBannerImage: {
+    width: "100%",
+    aspectRatio: TRIAL_BANNER_ASPECT,
+  },
+
+  outlineCard: {
     flexDirection: "row",
     alignItems: "center",
+    gap: spacing.s,
+    backgroundColor: colors.cardBackground,
+    borderRadius: spacing.cardRadius,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.gray30,
     paddingVertical: spacing.m,
     paddingHorizontal: spacing.cardPadding,
-    gap: spacing.s,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.cardBackground,
+    marginBottom: spacing.m,
   },
-  menuRowPressed: {
-    backgroundColor: colors.backgroundSecondary,
-  },
-  menuIconWrap: {
-    width: 32,
-    alignItems: "center",
-  },
-  menuTextWrap: {
+  updateLabel: {
     flex: 1,
+    fontFamily: typography.fonts.manrope.medium,
+    fontSize: 15,
+    color: palette.gray80,
   },
-  menuLabel: {
-    fontFamily: typography.fonts.inter.medium,
-    fontSize: typography.sizes.m,
-    color: colors.textPrimary,
+  downloadBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: PROFILE_DOWNLOAD_BG,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  menuValue: {
-    fontFamily: typography.fonts.inter.normal,
-    fontSize: typography.sizes.s,
-    color: colors.textSecondary,
-    marginTop: spacing.xxxs,
+  downloadBtnPressed: {
+    opacity: 0.85,
   },
-  menuDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
+
+  outlineCardStack: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: spacing.cardRadius,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.gray30,
+    overflow: "hidden",
+    marginBottom: spacing.m,
   },
-  logout: {
+  rowDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: palette.gray20,
+    marginLeft: spacing.cardPadding + 32 + spacing.s,
+  },
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.s,
     paddingVertical: spacing.m,
-    marginBottom: spacing.l,
+    paddingHorizontal: spacing.cardPadding,
   },
-  logoutText: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.m,
+  infoLabel: {
+    flex: 1,
+    fontFamily: typography.fonts.manrope.medium,
+    fontSize: 15,
+    color: palette.gray80,
+  },
+  infoValue: {
+    fontFamily: typography.fonts.manrope.regular,
+    fontSize: 14,
+    color: palette.gray50,
+    textAlign: "right",
+    maxWidth: "52%",
+  },
+
+  actionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.s,
+    paddingVertical: spacing.m,
+    paddingHorizontal: spacing.cardPadding,
+  },
+  rowPressed: {
+    backgroundColor: palette.gray10,
+  },
+  actionIconWrap: {
+    width: 28,
+    alignItems: "center",
+  },
+  actionLabel: {
+    flex: 1,
+    fontFamily: typography.fonts.manrope.medium,
+    fontSize: 15,
+    color: palette.gray80,
+  },
+  actionLabelDestructive: {
     color: colors.error,
   },
+
   footer: {
-    fontFamily: typography.fonts.inter.normal,
+    marginTop: spacing.s,
+    fontFamily: typography.fonts.manrope.regular,
     fontSize: typography.sizes.xs,
-    color: colors.textDisabled,
+    color: palette.gray50,
     textAlign: "center",
-    lineHeight: 16,
+    lineHeight: 18,
   },
 });
