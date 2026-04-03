@@ -37,17 +37,12 @@ const LOCAL_LOGOS: Record<string, number> = {
   microsoft: require("../../../../assets/microsoft.png") as number,
 };
 
-// ── Design tokens ────────────────────────────────────────────────
-const GREEN_BG = "#DAF2E6";   // top section / question card
-const GREEN_DARK = "#1A8F50";   // question card gradient edge
-const PANEL_RADIUS = 28;
-const DIAMOND = "✦";         // bullet icon matching Figma
+const DIAMOND = "✦";
 
-/** Key moments tab — design tokens (Figma-style) */
 const KM_PLAYER_BG = palette.orange10;
 const KM_PROGRESS_TRACK = palette.orange20;
-const KM_TIMESTAMP_BLUE = "#2563EB";
-const KM_SELECTION_BORDER = "#93C5FD";
+const KM_TIMESTAMP_BLUE = palette.keyMomentBlue;
+const KM_SELECTION_BORDER = palette.keyMomentBorder;
 
 function formatMmSs(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -147,7 +142,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
           >
             <Ionicons
               name={mockAudioPlaying ? "pause" : "play"}
-              size={22}
+              size={spacing.iconLg}
               color={colors.primary}
             />
           </Pressable>
@@ -197,7 +192,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
   return (
     <View style={styles.root}>
       {/* ── Green top section ─────────────────────────────────── */}
-      <View style={[styles.topSection, { paddingTop: insets.top + 12 }]}>
+      <View style={[styles.topSection, { paddingTop: insets.top + spacing.s }]}>
         {/* Close button — solid green circle with white X */}
         <Pressable
           style={styles.closeBtn}
@@ -205,7 +200,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
           accessibilityRole="button"
           accessibilityLabel="Close"
         >
-          <Ionicons name="close" size={22} color="#fff" />
+          <Ionicons name="close" size={spacing.iconLg} color={palette.white} />
         </Pressable>
 
         {/* Avatars from humans.png */}
@@ -296,7 +291,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
             renderItem={renderSummaryItem}
             keyExtractor={(row) => row.id}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
+            contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + spacing.xxxl }]}
           />
         ) : (
           <FlashList
@@ -307,7 +302,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[
               styles.momentsScroll,
-              { paddingBottom: insets.bottom + 40 },
+              { paddingBottom: insets.bottom + spacing.xxxl },
             ]}
           />
         )}
@@ -317,123 +312,128 @@ export function SessionResultScreen({ navigation, route }: Props) {
 }
 
 const shadow = Platform.select({
-  ios: { shadowColor: "#000", shadowOffset: { width: 0, height: -2 }, shadowOpacity: 0.06, shadowRadius: 8 },
+  ios: {
+    shadowColor: palette.shadow,
+    shadowOffset: { width: 0, height: -spacing.xxxs },
+    shadowOpacity: 0.06,
+    shadowRadius: spacing.xs,
+  },
   android: { elevation: 6 },
 });
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: GREEN_BG },
+  root: { flex: 1, backgroundColor: palette.sessionPageMint },
 
   /* ── Green top ──────────────────────────────────────────── */
   topSection: {
-    backgroundColor: GREEN_BG,
+    backgroundColor: palette.sessionPageMint,
     paddingHorizontal: spacing.screenPadding,
     alignItems: "center",
   },
 
   closeBtn: {
     alignSelf: "flex-end",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#2DB56B",
+    width: spacing.hitTarget,
+    height: spacing.hitTarget,
+    borderRadius: spacing.l,
+    backgroundColor: palette.sessionCloseMint,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: spacing.sessionCloseMarginBottom,
   },
 
   /* Avatars */
   avatarsRow: {
     flexDirection: "row",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: spacing.sessionAvatarsMarginBottom,
   },
   avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: "#D4F4E1",
+    width: spacing.sessionAvatar,
+    height: spacing.sessionAvatar,
+    borderRadius: spacing.sessionAvatar / 2,
+    backgroundColor: palette.sessionAvatarMint,
     overflow: "hidden",
-    borderWidth: 3,
-    borderColor: "#fff",
+    borderWidth: spacing.sessionAvatarBorderWidth,
+    borderColor: palette.white,
   },
   avatarRight: {
-    marginLeft: -24,
+    marginLeft: -spacing.sessionAvatarOverlap,
     zIndex: 0,
   },
   humansImg: {
-    width: 200,
-    height: 100,
+    width: spacing.sessionHumansWidth,
+    height: spacing.sessionHumansHeight,
     // show left half (male avatar)
     left: 0,
   },
   humansImgRight: {
     // show right half (female avatar)
-    left: -100,
+    left: -spacing.sessionHumansHeight,
   },
 
   /* Question card */
   questionCard: {
     width: "100%",
-    backgroundColor: "#13BF69",
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 30,
+    backgroundColor: palette.sessionCardGreen,
+    borderRadius: spacing.l,
+    padding: spacing.sessionQuestionCardPadding,
+    marginBottom: spacing.sessionQuestionCardMarginBottom,
   },
   questionText: {
     fontFamily: typography.fonts.manrope.bold,
-    fontSize: 14,
-    color: "#fff",
-    lineHeight: 26,
+    fontSize: typography.sizes.body,
+    color: palette.white,
+    lineHeight: typography.lineHeights.sessionQuestion,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: spacing.sessionQuestionTextMarginBottom,
   },
   companyRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: spacing.xs,
   },
   companyLogo: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#fff",
+    width: spacing.questionCompanyIcon,
+    height: spacing.questionCompanyIcon,
+    borderRadius: spacing.questionCompanyIcon / 2,
+    backgroundColor: palette.white,
   },
   companyLogoFallback: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    width: spacing.questionCompanyIcon,
+    height: spacing.questionCompanyIcon,
+    borderRadius: spacing.questionCompanyIcon / 2,
+    backgroundColor: palette.whiteAlpha40,
   },
   companyLabel: {
     fontFamily: typography.fonts.inter.medium,
-    fontSize: 14,
-    color: "rgba(255,255,255,0.90)",
+    fontSize: typography.sizes.body,
+    color: palette.whiteAlpha90,
   },
 
   /** Triangle pointing UP — anchored between avatars and top of question card */
   triangleBridge: {
     width: 0,
     height: 0,
-    borderLeftWidth: 16,
-    borderRightWidth: 16,
-    borderBottomWidth: 16,
+    borderLeftWidth: spacing.sessionTriangleSize,
+    borderRightWidth: spacing.sessionTriangleSize,
+    borderBottomWidth: spacing.sessionTriangleSize,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: "#13BF69",
+    borderBottomColor: palette.sessionBridgeGreen,
     alignSelf: "center",
-    marginBottom: -3, // tuck flush into the card top
+    marginBottom: -spacing.sessionTriangleOverlap,
   },
 
   /* ── White panel ────────────────────────────────────────── */
   panel: {
     flex: 1,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: PANEL_RADIUS,
-    borderTopRightRadius: PANEL_RADIUS,
-    paddingTop: 8,
-    marginTop: -PANEL_RADIUS / 2,
+    backgroundColor: palette.white,
+    borderTopLeftRadius: spacing.sessionPanelRadius,
+    borderTopRightRadius: spacing.sessionPanelRadius,
+    paddingTop: spacing.xs,
+    marginTop: -spacing.sessionPanelPullUp,
     ...shadow,
   },
 
@@ -441,79 +441,79 @@ const styles = StyleSheet.create({
   tabs: {
     flexDirection: "row",
     paddingHorizontal: spacing.screenPadding,
-    paddingTop: 12,
+    paddingTop: spacing.s,
   },
   tab: {
     flex: 1,
     alignItems: "center",
-    paddingBottom: 10,
+    paddingBottom: spacing.bulletGap,
     position: "relative",
   },
   tabActive: {},
   tabText: {
     fontFamily: typography.fonts.inter.medium,
-    fontSize: 15,
+    fontSize: typography.sizes.m,
     color: palette.gray50,
   },
   tabTextActive: {
     fontFamily: typography.fonts.inter.semiBold,
-    color: "#0B0B0D",
+    color: palette.ink,
   },
   tabUnderline: {
     position: "absolute",
     bottom: 0,
     left: "10%",
     right: "10%",
-    height: 2,
-    borderRadius: 1,
-    backgroundColor: "#0B0B0D",
+    height: spacing.xxxs,
+    borderRadius: spacing.xxxs / 2,
+    backgroundColor: palette.ink,
   },
   tabDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: palette.gray20,
     marginHorizontal: spacing.screenPadding,
-    marginBottom: 16,
+    marginBottom: spacing.m,
   },
 
   /* Summary */
   scrollContent: {
     paddingHorizontal: spacing.screenPadding,
-    paddingTop: 4,
+    paddingTop: spacing.xxs,
   },
   sectionTitle: {
     fontFamily: typography.fonts.inter.semiBold,
-    fontSize: 16,
-    color: "#0B0B0D",
-    marginBottom: 12,
+    fontSize: typography.sizes.section,
+    color: palette.ink,
+    marginBottom: spacing.s,
   },
   sectionDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: palette.gray20,
-    marginVertical: 20,
+    marginVertical: spacing.l,
   },
   bulletRow: {
     flexDirection: "row",
-    gap: 10,
-    marginBottom: 14,
+    gap: spacing.bulletGap,
+    marginBottom: spacing.popoverMetaMarginBottom,
     alignItems: "flex-start",
   },
   bulletDiamond: {
-    fontSize: 11,
-    color: "#0B0B0D",
-    marginTop: 4,
+    fontSize: typography.sizes.xs,
+    color: palette.ink,
+    marginTop: spacing.xxs,
   },
   bulletText: {
     flex: 1,
     fontFamily: typography.fonts.inter.normal,
-    fontSize: 15,
-    color: "#0B0B0D",
-    lineHeight: 22,
+    fontSize: typography.sizes.m,
+    color: palette.ink,
+    lineHeight: typography.lineHeights.relaxed,
   },
 
   /* Key moments tab */
   momentsScroll: {
     paddingHorizontal: spacing.screenPadding,
-    paddingTop: 8,
+    paddingTop: spacing.xs,
   },
   momentsListHeader: {
     paddingBottom: 0,
@@ -522,15 +522,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: KM_PLAYER_BG,
-    borderRadius: 16,
+    borderRadius: spacing.cardRadius,
     padding: spacing.m,
     gap: spacing.m,
     marginBottom: spacing.m,
   },
   playBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: spacing.playButton,
+    height: spacing.playButton,
+    borderRadius: spacing.playButton / 2,
     backgroundColor: palette.white,
     alignItems: "center",
     justifyContent: "center",
@@ -538,20 +538,20 @@ const styles = StyleSheet.create({
   playerMeta: { flex: 1, minWidth: 0 },
   playerTitle: {
     fontFamily: typography.fonts.manrope.bold,
-    fontSize: 15,
+    fontSize: typography.sizes.m,
     color: colors.primary,
     marginBottom: spacing.xs,
   },
   progressTrack: {
-    height: 6,
-    borderRadius: 3,
+    height: spacing.sessionProgressHeight,
+    borderRadius: spacing.sessionProgressHeight / 2,
     backgroundColor: KM_PROGRESS_TRACK,
     overflow: "hidden",
     marginBottom: spacing.xxs,
   },
   progressFill: {
     height: "100%",
-    borderRadius: 3,
+    borderRadius: spacing.sessionProgressHeight / 2,
     backgroundColor: colors.primary,
   },
   timeRow: {
@@ -572,23 +572,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xxs,
   },
   momentInnerSelected: {
-    borderWidth: 1,
+    borderWidth: spacing.hairline,
     borderColor: KM_SELECTION_BORDER,
     borderStyle: "dashed",
-    borderRadius: 8,
+    borderRadius: spacing.xs,
     paddingHorizontal: spacing.s,
     paddingVertical: spacing.xs,
   },
   momentTime: {
     fontFamily: typography.fonts.manrope.semiBold,
-    fontSize: 13,
+    fontSize: typography.sizes.s,
     color: KM_TIMESTAMP_BLUE,
-    marginBottom: 4,
+    marginBottom: spacing.xxs,
   },
   momentText: {
     fontFamily: typography.fonts.manrope.regular,
-    fontSize: 15,
-    color: "#0B0B0D",
-    lineHeight: 22,
+    fontSize: typography.sizes.m,
+    color: palette.ink,
+    lineHeight: typography.lineHeights.relaxed,
   },
 });

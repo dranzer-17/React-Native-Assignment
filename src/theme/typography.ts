@@ -32,15 +32,57 @@ export const typography = {
   },
 
   sizes: {
+    /** Bottom tab label */
+    tabLabel: 10,
     xs: 11,
     s: 13,
+    /** Figma body copy 14px */
+    body: 14,
     m: 15,
+    /** Figma section / tab labels 16px */
+    section: 16,
     l: 17,
+    /** Popover question title */
+    popoverTitle: 18,
     xl: 20,
     xxl: 24,
     xxxl: 30,
+    /** Welcome marketing title */
+    welcomeTitle: 28,
+    /** Login heading */
+    loginHeading: 30,
     display: 36,
+    /** Large badge number on question cards */
+    badgeNumber: 36,
   },
+
+  lineHeights: {
+    xs: 14,
+    sm: 18,
+    md: 20,
+    relaxed: 22,
+    popoverQuestion: 26,
+    sessionQuestion: 26,
+    loginHeading: 38,
+    welcomeTitle: 37,
+    legal: 18,
+  },
+
+  /** Use with `fontWeight` when not using Inter named faces */
+  weights: {
+    regular: "400",
+    medium: "500",
+    semiBold: "600",
+    bold: "700",
+  } as const,
+
+  letterSpacing: {
+    companyNameTight: -0.14,
+    headingTight: -0.3,
+    feedbackCta: 0.5,
+    aiListen: 0.3,
+    socialProof: 0.2,
+  } as const,
 } as const;
 
 export type Typography = typeof typography;

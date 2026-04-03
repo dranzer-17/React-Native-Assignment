@@ -4,15 +4,9 @@ import { Pressable, StyleSheet, Text, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { palette } from "@/theme/colors";
+import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
-
-/** Figma spec */
-const PILL_WIDTH = 172;
-const PILL_HEIGHT = 68;
-const STORE_SIZE = 68;
-const GAP = 8;
 
 type TabName = "HomeTab" | "SettingsTab" | "StoreTab";
 
@@ -38,8 +32,6 @@ function PillTabIcon({
 
 const ACTIVE_COLOR = palette.orange50;
 const INACTIVE_COLOR = palette.gray60;
-const STORE_BG = "#e2f3ff";   // always-on blue tint
-const STORE_ICON_COLOR = "#082f49"; // deep navy — darker icon
 
 type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
 
@@ -120,10 +112,10 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
                     <Ionicons
                         name={storeBagIcon(storeActive)}
-                        size={26}
-                        color={STORE_ICON_COLOR}
+                        size={spacing.tabStoreBagIcon}
+                        color={palette.storeIconNavy}
                     />
-                    <Text style={[styles.label, { color: STORE_ICON_COLOR }]}>Store</Text>
+                    <Text style={[styles.label, { color: palette.storeIconNavy }]}>Store</Text>
                 </Pressable>
 
             </View>
@@ -133,10 +125,10 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
 
 const shadow = Platform.select({
     ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
+        shadowColor: palette.shadow,
+        shadowOffset: { width: 0, height: spacing.micro },
         shadowOpacity: 0.1,
-        shadowRadius: 12,
+        shadowRadius: spacing.s,
     },
     android: { elevation: 8 },
 });
@@ -154,19 +146,19 @@ const styles = StyleSheet.create({
     row: {
         flexDirection: "row",
         alignItems: "center",
-        gap: GAP,
+        gap: spacing.tabGap,
     },
 
     /* ── Pill ──────────────────────────────────────────────── */
     pill: {
-        width: PILL_WIDTH,
-        height: PILL_HEIGHT,
-        borderRadius: PILL_HEIGHT / 2,
-        backgroundColor: "#fff",
+        width: spacing.tabPillWidth,
+        height: spacing.tabPillHeight,
+        borderRadius: spacing.tabPillHeight / 2,
+        backgroundColor: colors.background,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",
-        borderWidth: 1,
+        borderWidth: spacing.hairline,
         borderColor: palette.gray20,
         ...shadow,
     },
@@ -174,19 +166,19 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        gap: 2,
+        gap: spacing.tabLabelGap,
     },
 
     /* ── Store circle ──────────────────────────────────────── */
     storeCircle: {
-        width: STORE_SIZE,
-        height: STORE_SIZE,
-        borderRadius: STORE_SIZE / 2,
-        backgroundColor: STORE_BG,
+        width: spacing.tabStoreCircle,
+        height: spacing.tabStoreCircle,
+        borderRadius: spacing.tabStoreCircle / 2,
+        backgroundColor: palette.storeCircleBlue,
         alignItems: "center",
         justifyContent: "center",
-        gap: 2,
-        borderWidth: 1,
+        gap: spacing.tabLabelGap,
+        borderWidth: spacing.hairline,
         borderColor: palette.gray20,
         overflow: "hidden", // clips the glass shine strips
         ...shadow,
@@ -194,28 +186,28 @@ const styles = StyleSheet.create({
     /** Glass strip 1 — diagonal, clipped by circle overflow:hidden */
     storeShine1: {
         position: "absolute",
-        width: 18,
-        height: 120,
-        left: -4,
-        top: -30,
-        backgroundColor: "rgba(255,255,255,0.45)",
+        width: spacing.iconMd,
+        height: spacing.tabStoreShineHeight,
+        left: -spacing.xxs,
+        top: spacing.tabStoreShineTop,
+        backgroundColor: palette.whiteAlpha45,
         transform: [{ rotate: "30deg" }],
     },
     /** Glass strip 2 — slightly right of strip 1 */
     storeShine2: {
         position: "absolute",
-        width: 10,
-        height: 120,
-        left: 22,
-        top: -30,
-        backgroundColor: "rgba(255,255,255,0.45)",
+        width: spacing.tabStoreShine2Width,
+        height: spacing.tabStoreShineHeight,
+        left: spacing.tabStoreShine2Left,
+        top: spacing.tabStoreShineTop,
+        backgroundColor: palette.whiteAlpha45,
         transform: [{ rotate: "30deg" }],
     },
 
     /* ── Shared ──────────────────────────────────────────────*/
     label: {
         fontFamily: typography.fonts.inter.medium,
-        fontSize: 10,
+        fontSize: typography.sizes.tabLabel,
         includeFontPadding: false,
     },
 });

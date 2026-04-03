@@ -6,7 +6,7 @@ import type { ImageSource } from "expo-image";
 import type { Question } from "@/types/mock-data";
 import { remoteImageWithHeaders } from "@/utils/remote-image";
 import { palette } from "@/theme/colors";
-import { spacing } from "@/theme/spacing";
+import { homeQuestionCardScreenLeftOffsets, spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 import type { CardLayout } from "@/features/home/components/question-popover";
 
@@ -45,65 +45,58 @@ function getLogoSource(item: Question): ImageSource {
 /** Badge colour config per question state */
 const BADGE_CFG = {
   active: {
-    outerAlt: "#79D634",
-    outer: "#79D634",
-    inner: "#79D634",
-    numColor: "#fff",
-    innerRadius: 25.9,
-    cardBg: "#D8F7C2",
-    innerCardBg: "#D8F7C2",
-    shadowColor: "#79D634",
+    outerAlt: palette.homeQuestionActiveLime,
+    outer: palette.homeQuestionActiveLime,
+    inner: palette.homeQuestionActiveLime,
+    numColor: palette.white,
+    innerRadius: spacing.questionBadgeInnerRadius,
+    cardBg: palette.homeQuestionActiveMint,
+    innerCardBg: palette.homeQuestionActiveMint,
+    shadowColor: palette.homeQuestionActiveLime,
     hasShadow: false,
-    logoBorder: "#D8F7C2",
+    logoBorder: palette.homeQuestionActiveMint,
   },
   next: {
-    outerAlt: "#FFD033",
-    outer: "#FFD033",
-    inner: "#FFD033",
-    numColor: "#fff",
-    innerRadius: 25.9,
-    cardBg: "#FFF0BF",
-    innerCardBg: "#FFF0BF",
-    shadowColor: "transparent",
-    hasShadow: false,          // no shadow for Amazon — matches user request
-    logoBorder: "#FFF0BF",
+    outerAlt: palette.homeQuestionNextGold,
+    outer: palette.homeQuestionNextGold,
+    inner: palette.homeQuestionNextGold,
+    numColor: palette.white,
+    innerRadius: spacing.questionBadgeInnerRadius,
+    cardBg: palette.homeQuestionNextCream,
+    innerCardBg: palette.homeQuestionNextCream,
+    shadowColor: palette.transparent,
+    hasShadow: false,
+    logoBorder: palette.homeQuestionNextCream,
   },
   locked: {
-    outerAlt: "#d1d1d6",
-    outer: "#d1d1d6",
-    inner: "#d1d1d6",
-    numColor: "#fff",
-    innerRadius: 25.9,
-    cardBg: "#efeff4",
-    innerCardBg: "#efeff4",
-    shadowColor: "#efeff4",
+    outerAlt: palette.homeQuestionLockedRing,
+    outer: palette.homeQuestionLockedRing,
+    inner: palette.homeQuestionLockedRing,
+    numColor: palette.white,
+    innerRadius: spacing.questionBadgeInnerRadius,
+    cardBg: palette.homeQuestionLockedCard,
+    innerCardBg: palette.homeQuestionLockedCard,
+    shadowColor: palette.homeQuestionLockedCard,
     hasShadow: false,
-    logoBorder: "#efeff4",
+    logoBorder: palette.homeQuestionLockedCard,
   },
 } as const;
 
-/** Figma exact pixel values */
-const CARD_W = 206;
-const CARD_H = 73;
-const BADGE_OVERFLOW_TOP = 9;
-const BADGE_LEFT = 124.37;
-const BADGE_OUTER = 74;
-const BADGE_INNER = 64;
-const BADGE_CONTAINER = 90.63;
-const ROW_W = Math.ceil(BADGE_LEFT + BADGE_CONTAINER); // ~215pt
-
-/**
- * Figma staircase: left offsets from screen left edge per question index.
- * List has paddingLeft 20; wrapper marginLeft = offset - 20.
- */
-const SCREEN_LEFT_OFFSETS = [48.42, 80.42, 120.42, 160.42, 120.42] as const;
+const CARD_W = spacing.questionCardWidth;
+const CARD_H = spacing.questionCardHeight;
+const BADGE_OVERFLOW_TOP = spacing.questionBadgeOverflowTop;
+const BADGE_LEFT = spacing.questionBadgeLeft;
+const BADGE_OUTER = spacing.questionBadgeOuter;
+const BADGE_INNER = spacing.questionBadgeInner;
+const BADGE_CONTAINER = spacing.questionBadgeContainer;
+const ROW_W = Math.ceil(BADGE_LEFT + BADGE_CONTAINER);
 
 function getMarginLeft(index: number): number {
   const offset =
-    index < SCREEN_LEFT_OFFSETS.length
-      ? SCREEN_LEFT_OFFSETS[index]
-      : SCREEN_LEFT_OFFSETS[SCREEN_LEFT_OFFSETS.length - 1];
-  return offset - 20;
+    index < homeQuestionCardScreenLeftOffsets.length
+      ? homeQuestionCardScreenLeftOffsets[index]
+      : homeQuestionCardScreenLeftOffsets[homeQuestionCardScreenLeftOffsets.length - 1];
+  return offset - spacing.screenPadding;
 }
 
 export const QuestionCard = memo(function QuestionCard({
@@ -147,7 +140,7 @@ export const QuestionCard = memo(function QuestionCard({
                 ...(cfg.hasShadow && Platform.OS === "ios"
                   ? {
                     shadowColor: cfg.shadowColor,
-                    shadowOffset: { width: 1, height: 8 },
+                    shadowOffset: { width: spacing.hairline, height: spacing.xs },
                     shadowOpacity: 1 as const,
                     shadowRadius: 0,
                   }
@@ -257,76 +250,76 @@ const styles = StyleSheet.create({
     width: CARD_W,
     top: BADGE_OVERFLOW_TOP,
     height: CARD_H,
-    borderRadius: 30,
+    borderRadius: spacing.questionCardBorderRadiusLarge,
     overflow: "visible",
   },
   greenCardDefault: {
-    borderWidth: 1,
-    borderColor: "#ECECEC",
+    borderWidth: spacing.hairline,
+    borderColor: palette.homeCompanyRule,
   },
 
   /* Inner highlight area (no gold — same green family) */
   innerArea: {
     position: "absolute",
-    left: 4,
-    top: 5,
-    right: 6,          // extends to ~200pt in 206pt card
-    bottom: 5,
-    borderRadius: 27.8,
+    left: spacing.questionInnerInsetLeft,
+    top: spacing.questionInnerInsetTop,
+    right: spacing.questionInnerInsetRight,
+    bottom: spacing.questionInnerInsetBottom,
+    borderRadius: spacing.questionInnerAreaRadius,
     overflow: "hidden",
   },
   /** Glass strip 1 — wide diagonal, clipped by innerArea overflow:hidden */
   shine1: {
     position: "absolute",
-    width: 40,
-    height: 220,
-    left: -20,
-    top: -80,
-    backgroundColor: "rgba(255,255,255,0.40)",
+    width: spacing.questionCardShine1Width,
+    height: spacing.questionCardShine1Height,
+    left: spacing.questionCardShine1Left,
+    top: spacing.questionCardShineTop,
+    backgroundColor: palette.whiteAlpha40,
     transform: [{ rotate: "30deg" }],
   },
   /** Glass strip 2 — spaced 40pt right of strip 1 */
   shine2: {
     position: "absolute",
-    width: 22,
-    height: 220,
-    left: 40,
-    top: -80,
-    backgroundColor: "rgba(255,255,255,0.40)",
+    width: spacing.questionCardShine2Width,
+    height: spacing.questionCardShine1Height,
+    left: spacing.questionCardShine2Left,
+    top: spacing.questionCardShineTop,
+    backgroundColor: palette.whiteAlpha40,
     transform: [{ rotate: "30deg" }],
   },
 
   /* Company content: text then logo */
   companyContent: {
     position: "absolute",
-    left: 20,
+    left: spacing.questionCompanyRowLeft,
     top: 0,
     bottom: 0,
-    right: 90,
+    right: spacing.questionCompanyRowRight,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: spacing.micro,
   },
   companyName: {
     fontFamily: typography.fonts.inter.semiBold,
-    fontSize: 14,
-    color: "#0B0B0D",
-    letterSpacing: -0.14,
+    fontSize: typography.sizes.body,
+    color: palette.ink,
+    letterSpacing: typography.letterSpacing.companyNameTight,
     flexShrink: 1,
   },
-  companyNameMuted: { color: "#0B0B0D" },
+  companyNameMuted: { color: palette.ink },
 
   logoCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#fff",
-    borderWidth: 0.7,
+    width: spacing.questionCompanyIcon,
+    height: spacing.questionCompanyIcon,
+    borderRadius: spacing.questionCompanyIcon / 2,
+    backgroundColor: palette.white,
+    borderWidth: spacing.questionLogoBorderWidth,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
   },
-  logoImg: { width: 20, height: 20 },
+  logoImg: { width: spacing.questionLogoSize, height: spacing.questionLogoSize },
 
   /* ── Badge ────────────────────────────────────────────────── */
   badgeContainer: {
@@ -343,7 +336,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: BADGE_OUTER,
     height: BADGE_OUTER,
-    borderRadius: 30,
+    borderRadius: spacing.questionCardBorderRadiusLarge,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
@@ -352,7 +345,7 @@ const styles = StyleSheet.create({
   badgeOuterInner: {
     width: BADGE_OUTER,
     height: BADGE_OUTER,
-    borderRadius: 30,
+    borderRadius: spacing.questionCardBorderRadiusLarge,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
@@ -363,8 +356,8 @@ const styles = StyleSheet.create({
    */
   badgeInner: {
     position: "absolute",
-    left: 5,             // Figma: (5,5) offset within 74×74 outer
-    top: 5,
+    left: spacing.questionBadgeInnerGutter,
+    top: spacing.questionBadgeInnerGutter,
     width: BADGE_INNER,
     height: BADGE_INNER,
     overflow: "hidden",
@@ -372,21 +365,21 @@ const styles = StyleSheet.create({
   /** Badge shine 1 — longer, clipped by badgeInner overflow:hidden */
   badgeShine1: {
     position: "absolute",
-    width: 18,
-    height: 140,
-    left: -9.81,
-    top: -40,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    width: spacing.questionBadgeShineWidth,
+    height: spacing.questionBadgeShine1Height,
+    left: spacing.questionBadgeShine1Left,
+    top: spacing.questionBadgeShineTop,
+    backgroundColor: palette.whiteAlpha40,
     transform: [{ rotate: "30deg" }],
   },
   /** Badge shine 2 — longer, clipped by badgeInner overflow:hidden */
   badgeShine2: {
     position: "absolute",
-    width: 18,
-    height: 160,
-    left: 13.94,
-    top: -40,
-    backgroundColor: "rgba(255,255,255,0.4)",
+    width: spacing.questionBadgeShineWidth,
+    height: spacing.questionBadgeShine2Height,
+    left: spacing.questionBadgeShine2Left,
+    top: spacing.questionBadgeShineTop,
+    backgroundColor: palette.whiteAlpha40,
     transform: [{ rotate: "30deg" }],
   },
   /** Number: centered over full 74×74 badge */
@@ -399,11 +392,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
     fontFamily: typography.fonts.inter.bold,
-    fontSize: 36,
+    fontSize: typography.sizes.badgeNumber,
     includeFontPadding: false,
   },
   /** Stroke copies */
   badgeNumStroke: {
-    color: "rgba(0,0,0,0.6)",
+    color: palette.blackAlpha60,
   },
 });

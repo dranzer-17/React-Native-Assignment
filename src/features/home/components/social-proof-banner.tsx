@@ -2,6 +2,7 @@ import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { Question } from "@/types/mock-data";
+import { palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
@@ -14,12 +15,12 @@ export const SocialProofBanner = memo(function SocialProofBanner({ question }: S
   return (
     <View style={styles.proofWrap}>
       <View style={styles.proofBanner}>
-        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
+        <Ionicons name="flag" size={spacing.iconSm} color={palette.socialProofAmber} style={styles.proofIcon} />
         <Text style={styles.proofText}>
           {question.completedTodayCount.toLocaleString()} users completed Question{" "}
           {question.questionNumber} today
         </Text>
-        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
+        <Ionicons name="flag" size={spacing.iconSm} color={palette.socialProofAmber} style={styles.proofIcon} />
       </View>
       <View style={styles.proofDash} />
     </View>
@@ -37,19 +38,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     gap: spacing.xxs,
   },
-  proofIcon: { marginHorizontal: 2 },
+  proofIcon: { marginHorizontal: spacing.xxxs },
   proofText: {
     fontFamily: typography.fonts.inter.semiBold,
     fontSize: typography.sizes.xs,
-    color: "#BF9C26",
-    letterSpacing: 0.2,
+    color: palette.socialProofAmber,
+    letterSpacing: typography.letterSpacing.socialProof,
     flex: 1,
     textAlign: "center",
   },
   proofDash: {
     height: 0,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#BF9C26",
+    borderBottomWidth: spacing.dashedRuleWidth,
+    borderBottomColor: palette.socialProofAmber,
     borderStyle: "dashed",
     marginHorizontal: spacing.s,
   },

@@ -24,15 +24,11 @@ const questions = questionsData as Question[];
 /** Figma: shown after question 3 in the list */
 const SOCIAL_PROOF_AFTER_INDEX = 2;
 
-const MENU_ICON_SIZE = 24;
-const MENU_CIRCLE = 40;
-const FLASH_ICON_SIZE = 14;
-
 /** Figma: notification badge — green pill with lightning + count */
 function NotificationBadge({ count }: { count: number }) {
   return (
     <View style={styles.notifBadge}>
-      <Ionicons name="flash" size={FLASH_ICON_SIZE} color="#fff" />
+      <Ionicons name="flash" size={spacing.iconSm} color={palette.white} />
       <Text style={styles.notifCount}>{count}</Text>
     </View>
   );
@@ -80,10 +76,10 @@ export function HomeScreen({ navigation }: Props) {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Menu"
-                hitSlop={8}
+                hitSlop={spacing.xs}
                 style={({ pressed }) => [styles.menuCircle, pressed && styles.menuCirclePressed]}
               >
-                <Ionicons name="menu-outline" size={MENU_ICON_SIZE} color={palette.gray90} />
+                <Ionicons name="menu-outline" size={spacing.xl} color={palette.gray90} />
               </Pressable>
             </View>
           </View>
@@ -101,7 +97,7 @@ export function HomeScreen({ navigation }: Props) {
                 Big Tech Companies
               </Text>
             </View>
-            <Ionicons name="chevron-down" size={20} color={palette.gray70} />
+            <Ionicons name="chevron-down" size={spacing.iconXl} color={palette.gray70} />
           </Pressable>
         </View>
       </View>
@@ -141,8 +137,8 @@ const styles = StyleSheet.create({
   listHeaderBar: {
     backgroundColor: colors.background,
     paddingHorizontal: spacing.screenPadding,
-    paddingBottom: 2,
-    marginBottom: 7,
+    paddingBottom: spacing.xxxs,
+    marginBottom: spacing.homeListHeaderMarginBottom,
   },
   headerCluster: {
     flexDirection: "row",
@@ -160,9 +156,9 @@ const styles = StyleSheet.create({
     gap: spacing.s,
   },
   menuCircle: {
-    width: MENU_CIRCLE,
-    height: MENU_CIRCLE,
-    borderRadius: MENU_CIRCLE / 2,
+    width: spacing.hitTarget,
+    height: spacing.hitTarget,
+    borderRadius: spacing.hitTarget / 2,
     backgroundColor: palette.gray20,
     alignItems: "center",
     justifyContent: "center",
@@ -176,17 +172,17 @@ const styles = StyleSheet.create({
   notifBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#3EBD70",
-    borderRadius: 20,
+    backgroundColor: palette.homeNotifGreen,
+    borderRadius: spacing.l,
     paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs + 1,
-    gap: 4,
-    minHeight: 36,
+    paddingVertical: spacing.xsPlus1,
+    gap: spacing.micro,
+    minHeight: spacing.notifBadgeMinHeight,
   },
   notifCount: {
     fontFamily: typography.fonts.inter.bold,
-    fontSize: 15,
-    color: "#fff",
+    fontSize: typography.sizes.m,
+    color: palette.white,
     includeFontPadding: false,
   },
 
@@ -194,7 +190,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: spacing.screenPadding,
     paddingTop: 0,
-    paddingBottom: 148,
+    paddingBottom: spacing.homeListContentBottomInset,
     backgroundColor: colors.background,
   },
   listTop: {
@@ -205,14 +201,14 @@ const styles = StyleSheet.create({
   practiceCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFF3CD",
+    backgroundColor: palette.homePracticeYellow,
     borderRadius: spacing.cardRadius,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.s,
     paddingVertical: spacing.s,
-    gap: 12,
+    gap: spacing.s,
     ...Platform.select({
       ios: {
-        shadowColor: "#B8860B",
+        shadowColor: palette.homePracticeShadow,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 4,
@@ -221,18 +217,18 @@ const styles = StyleSheet.create({
       default: {},
     }),
   },
-  practiceEmoji: { fontSize: 22 },
+  practiceEmoji: { fontSize: spacing.practiceEmoji },
   practiceMeta: { flex: 1, minWidth: 0 },
   practiceSmall: {
     fontFamily: typography.fonts.inter.normal,
-    fontSize: 11,
+    fontSize: typography.sizes.xs,
     color: palette.gray60,
-    lineHeight: 14,
+    lineHeight: typography.lineHeights.xs,
   },
   practiceBig: {
     fontFamily: typography.fonts.inter.bold,
     fontSize: typography.sizes.m,
     color: palette.gray90,
-    lineHeight: 20,
+    lineHeight: typography.lineHeights.md,
   },
 });

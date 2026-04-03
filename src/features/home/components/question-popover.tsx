@@ -3,6 +3,7 @@ import { Dimensions, Modal, Platform, Pressable, StyleSheet, Text, View } from "
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import type { Question } from "@/types/mock-data";
+import { palette } from "@/theme/colors";
 import { typography } from "@/theme/typography";
 import { spacing } from "@/theme/spacing";
 
@@ -21,26 +22,37 @@ export interface QuestionPopoverProps {
 }
 
 const SCREEN_W = Dimensions.get("window").width;
-const POPOVER_W = Math.min(345, SCREEN_W - 32);
-const ARROW_W = 24;
-const ARROW_H = 10;
-const BORDER_RADIUS = 16;
-const GAP_FROM_CARD = 40;
-/** Rough estimated height — used only for "above" offset so popover clears the card */
-const POPOVER_ESTIMATED_H = 205;
+const POPOVER_W = Math.min(spacing.popoverMaxWidth, SCREEN_W - spacing.popoverHorizontalInset);
+const ARROW_W = spacing.popoverArrowWidth;
+const ARROW_H = spacing.popoverArrowHeight;
+const BORDER_RADIUS = spacing.cardRadius;
+const GAP_FROM_CARD = spacing.popoverGapFromCard;
+const POPOVER_ESTIMATED_H = spacing.popoverEstimatedHeight;
 
 /** Per-state colour palette */
 const STATE_COLORS = {
-  active: { bg: "#79D634", aiBtn: "#325E0F", text: "#0B2100" },
-  next: { bg: "#FFD033", aiBtn: "#7B6009", text: "#2B1E00" },
-  locked: { bg: "#FFFFFF", aiBtn: "#374151", text: "#111827" },
+  active: {
+    bg: palette.homeQuestionActiveLime,
+    aiBtn: palette.homeQuestionActiveDeep,
+    text: palette.homeQuestionActiveLabel,
+  },
+  next: {
+    bg: palette.homeQuestionNextGold,
+    aiBtn: palette.homeQuestionNextDeep,
+    text: palette.homeQuestionNextLabel,
+  },
+  locked: {
+    bg: palette.white,
+    aiBtn: palette.gray80,
+    text: palette.inkMuted,
+  },
 } as const;
 
 export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: QuestionPopoverProps) {
   if (!question || !cardLayout) return null;
 
   const state = question.state ?? "locked";
-  const colors = STATE_COLORS[state];
+  const stateColors = STATE_COLORS[state];
 
   // Smart: show ABOVE card if its centre is in the lower half of the screen
   const SCREEN_H = Dimensions.get("window").height;
@@ -51,8 +63,11 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
   // Arrow: align horizontally to card centre, clamped inside popover
   const cardCentreX = cardLayout.x + cardLayout.width / 2;
   const arrowOffsetInPop = Math.max(
-    BORDER_RADIUS + 4,
-    Math.min(POPOVER_W - BORDER_RADIUS - ARROW_W - 4, cardCentreX - popoverLeft - ARROW_W / 2),
+    BORDER_RADIUS + spacing.xxxs,
+    Math.min(
+      POPOVER_W - BORDER_RADIUS - ARROW_W - spacing.xxxs,
+      cardCentreX - popoverLeft - ARROW_W / 2,
+    ),
   );
 
   const positionStyle = showAbove
@@ -75,29 +90,29 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
 
       <Animated.View
         entering={FadeInDown.springify().damping(18).stiffness(220)}
-        style={[styles.popover, positionStyle, { backgroundColor: colors.bg }]}
+        style={[styles.popover, positionStyle, { backgroundColor: stateColors.bg }]}
       >
         {/* Arrow — DOWN when popover is above card, UP when below */}
         {showAbove ? (
-          <View style={[styles.arrowDown, { left: arrowOffsetInPop, borderTopColor: colors.bg }]} />
+          <View style={[styles.arrowDown, { left: arrowOffsetInPop, borderTopColor: stateColors.bg }]} />
         ) : (
-          <View style={[styles.arrowUp, { left: arrowOffsetInPop, borderBottomColor: colors.bg }]} />
+          <View style={[styles.arrowUp, { left: arrowOffsetInPop, borderBottomColor: stateColors.bg }]} />
         )}
 
         <Text
-          style={[styles.questionText, { color: colors.text }]}
+          style={[styles.questionText, { color: stateColors.text }]}
           accessibilityRole="header"
         >
           {question.text}
         </Text>
 
         <View style={styles.metaRow}>
-          <Text style={[styles.askedBy, { color: colors.text, opacity: 0.75 }]}>
+          <Text style={[styles.askedBy, { color: stateColors.text, opacity: 0.75 }]}>
             Asked by <Text style={styles.askedByBold}>{question.companyName}</Text>
           </Text>
           <View style={styles.durationRow}>
-            <Ionicons name="time-outline" size={13} color={colors.text} style={{ opacity: 0.75 }} />
-            <Text style={[styles.durationText, { color: colors.text, opacity: 0.75 }]}>
+            <Ionicons name="time-outline" size={typography.sizes.s} color={stateColors.text} style={{ opacity: 0.75 }} />
+            <Text style={[styles.durationText, { color: stateColors.text, opacity: 0.75 }]}>
               {question.durationMinutes} mins
             </Text>
           </View>
@@ -115,7 +130,7 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
           <Text style={styles.feedbackLabel}>FEEDBACK</Text>
         </Pressable>
 
-        <View style={[styles.aiWrapper, { backgroundColor: colors.aiBtn }]}>
+        <View style={[styles.aiWrapper, { backgroundColor: stateColors.aiBtn }]}>
           <Pressable
             style={styles.aiFace}
             disabled
@@ -123,7 +138,7 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
             accessibilityState={{ disabled: true }}
             accessibilityLabel="AI versus AI listen, coming soon"
           >
-            <Ionicons name="headset" size={18} color="#fff" />
+            <Ionicons name="headset" size={spacing.iconMd} color={palette.white} />
             <Text style={styles.aiLabel}>  AI VS AI (LISTEN)</Text>
           </Pressable>
         </View>
@@ -133,19 +148,24 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
 }
 
 const shadow = Platform.select({
-  ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.18, shadowRadius: 16 },
+  ios: {
+    shadowColor: palette.shadow,
+    shadowOffset: { width: 0, height: spacing.xs },
+    shadowOpacity: 0.18,
+    shadowRadius: spacing.m,
+  },
   android: { elevation: 12 },
 });
 
 const styles = StyleSheet.create({
   dim: {
-    backgroundColor: "rgba(0,0,0,0.38)",
+    backgroundColor: palette.overlayModal,
   },
   popover: {
     position: "absolute",
     width: POPOVER_W,
     borderRadius: BORDER_RADIUS,
-    padding: 16,
+    padding: spacing.cardPadding,
     ...shadow,
   },
 
@@ -171,27 +191,41 @@ const styles = StyleSheet.create({
 
   questionText: {
     fontFamily: typography.fonts.inter.bold,
-    fontSize: 18, lineHeight: 26, marginBottom: 10,
+    fontSize: typography.sizes.popoverTitle,
+    lineHeight: typography.lineHeights.popoverQuestion,
+    marginBottom: spacing.popoverQuestionMarginBottom,
   },
   metaRow: {
     flexDirection: "row", alignItems: "center",
-    justifyContent: "space-between", marginBottom: 14,
+    justifyContent: "space-between", marginBottom: spacing.popoverMetaMarginBottom,
   },
-  askedBy: { fontFamily: typography.fonts.inter.normal, fontSize: 13, flex: 1 },
+  askedBy: { fontFamily: typography.fonts.inter.normal, fontSize: typography.sizes.s, flex: 1 },
   askedByBold: { fontFamily: typography.fonts.inter.semiBold },
-  durationRow: { flexDirection: "row", alignItems: "center", gap: 3 },
-  durationText: { fontFamily: typography.fonts.inter.medium, fontSize: 13 },
+  durationRow: { flexDirection: "row", alignItems: "center", gap: spacing.tight },
+  durationText: { fontFamily: typography.fonts.inter.medium, fontSize: typography.sizes.s },
 
   feedbackBtn: {
-    height: 48, borderRadius: 12, backgroundColor: "#fff",
+    height: spacing.feedbackButtonHeight,
+    borderRadius: spacing.inputRadius,
+    backgroundColor: palette.white,
     alignItems: "center", justifyContent: "center", marginBottom: spacing.s,
   },
   feedbackLabel: {
-    fontFamily: typography.fonts.inter.bold, fontSize: 15,
-    color: "#13BF69", letterSpacing: 0.5,
+    fontFamily: typography.fonts.inter.bold, fontSize: typography.sizes.m,
+    color: palette.feedbackBrand, letterSpacing: typography.letterSpacing.feedbackCta,
   },
 
-  aiWrapper: { borderRadius: 12, overflow: "hidden" },
-  aiFace: { height: 48, flexDirection: "row", alignItems: "center", justifyContent: "center" },
-  aiLabel: { fontFamily: typography.fonts.inter.bold, fontSize: 15, color: "#fff", letterSpacing: 0.3 },
+  aiWrapper: { borderRadius: spacing.inputRadius, overflow: "hidden" },
+  aiFace: {
+    height: spacing.feedbackButtonHeight,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiLabel: {
+    fontFamily: typography.fonts.inter.bold,
+    fontSize: typography.sizes.m,
+    color: palette.white,
+    letterSpacing: typography.letterSpacing.aiListen,
+  },
 });

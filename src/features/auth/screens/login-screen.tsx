@@ -24,13 +24,6 @@ type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 /** Figma shows 6 OTP boxes */
 const OTP_LENGTH = 6;
 
-/** Figma button spec */
-const BTN_FACE_H = 58;
-const BTN_DEPTH = 8;
-const BTN_RADIUS = 12;
-const BTN_ORANGE = "#FF6D00";
-const BTN_DEEP = "#FF3900";
-
 interface Country {
   flag: string;
   name: string;
@@ -129,7 +122,7 @@ export function LoginScreen({ navigation }: Props) {
                 {item.name === country.name && (
                   <Ionicons
                     name="checkmark"
-                    size={18}
+                    size={spacing.iconMd}
                     color={colors.primary}
                   />
                 )}
@@ -158,9 +151,9 @@ export function LoginScreen({ navigation }: Props) {
             accessibilityLabel="Go back"
             onPress={() => navigation.goBack()}
             style={styles.back}
-            hitSlop={12}
+            hitSlop={spacing.s}
           >
-            <Ionicons name="chevron-back" size={28} color={colors.textPrimary} />
+            <Ionicons name="chevron-back" size={spacing.loginBackIcon} color={colors.textPrimary} />
           </Pressable>
 
           {/* Heading — Figma: Manrope SemiBold 30 / -1% ls */}
@@ -186,7 +179,7 @@ export function LoginScreen({ navigation }: Props) {
               <Text style={styles.countryCode}>{country.dial}</Text>
               <Ionicons
                 name="chevron-down"
-                size={13}
+                size={typography.sizes.s}
                 color={colors.textSecondary}
               />
             </Pressable>
@@ -292,9 +285,9 @@ const styles = StyleSheet.create({
 
   /* ── Heading ── Figma: Manrope SemiBold 30 -1% ls ──────── */
   heading: {
-    fontSize: 30,
-    lineHeight: 38,
-    letterSpacing: -0.3,
+    fontSize: typography.sizes.loginHeading,
+    lineHeight: typography.lineHeights.loginHeading,
+    letterSpacing: typography.letterSpacing.headingTight,
     marginBottom: spacing.s,
     fontFamily: typography.fonts.inter.bold,
   },
@@ -304,10 +297,10 @@ const styles = StyleSheet.create({
   /* ── Caption ── Figma: Inter Regular 14 / Surface·70 ────── */
   caption: {
     fontFamily: typography.fonts.inter.normal,
-    fontSize: 14,
+    fontSize: typography.sizes.body,
     color: palette.gray60,
     marginBottom: spacing.xxl,
-    lineHeight: 20,
+    lineHeight: typography.lineHeights.md,
   },
 
   /* ── Field labels ─────────────────────────────────────────  */
@@ -329,12 +322,12 @@ const styles = StyleSheet.create({
   phoneRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: spacing.hairline,
     borderColor: colors.border,
     borderRadius: spacing.inputRadius,
     backgroundColor: palette.gray10,
     overflow: "hidden",
-    height: 52,
+    height: spacing.otpInputHeight,
   },
   phoneRowError: { borderColor: colors.error },
   countryPill: {
@@ -344,13 +337,13 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
     height: "100%",
   },
-  flag: { fontSize: 18, lineHeight: 22 },
+  flag: { fontSize: spacing.iconMd, lineHeight: typography.lineHeights.relaxed },
   countryCode: {
     fontFamily: typography.fonts.inter.semiBold,
     fontSize: typography.sizes.m,
     color: colors.textPrimary,
   },
-  divider: { width: 1, height: 28, backgroundColor: colors.border },
+  divider: { width: spacing.hairline, height: spacing.authDividerHeight, backgroundColor: colors.border },
   phoneInput: {
     flex: 1,
     paddingHorizontal: spacing.m,
@@ -365,7 +358,7 @@ const styles = StyleSheet.create({
   otpRow: { flexDirection: "row", gap: spacing.xs },
   otpCell: {
     flex: 1,
-    height: 52,
+    height: spacing.otpInputHeight,
     borderRadius: spacing.inputRadius,
     borderWidth: 0,
     backgroundColor: palette.gray20,
@@ -377,12 +370,12 @@ const styles = StyleSheet.create({
   },
   otpCellFocused: {
     backgroundColor: palette.gray30,
-    borderWidth: 1.5,
+    borderWidth: spacing.inputBorderAccent,
     borderColor: colors.primary,
   },
   otpCellFilled: {
     backgroundColor: palette.orange10,
-    borderWidth: 1.5,
+    borderWidth: spacing.inputBorderAccent,
     borderColor: colors.primary,
     color: colors.primary,
   },
@@ -392,15 +385,15 @@ const styles = StyleSheet.create({
   /* ── 3D Continue button ──────────────────────────────────── */
   ctaWrapper: {
     width: "100%",
-    height: BTN_FACE_H + BTN_DEPTH,
-    backgroundColor: BTN_DEEP,
-    borderRadius: BTN_RADIUS,
+    height: spacing.authCtaFaceHeight + spacing.authCtaDepth,
+    backgroundColor: palette.authCtaDepth,
+    borderRadius: spacing.inputRadius,
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowColor: palette.shadow,
+        shadowOffset: { width: 0, height: spacing.xs },
         shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowRadius: spacing.xxxs,
       },
       android: { elevation: 8 },
       default: {},
@@ -415,39 +408,39 @@ const styles = StyleSheet.create({
     }),
   },
   ctaFace: {
-    height: BTN_FACE_H,
-    backgroundColor: BTN_ORANGE,
-    borderRadius: BTN_RADIUS,
+    height: spacing.authCtaFaceHeight,
+    backgroundColor: palette.authCtaFace,
+    borderRadius: spacing.inputRadius,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.s,
   },
   ctaFaceDisabled: { backgroundColor: colors.buttonDisabled },
-  ctaFacePressed: { transform: [{ translateY: BTN_DEPTH }] },
+  ctaFacePressed: { transform: [{ translateY: spacing.authCtaDepth }] },
   ctaLabel: {
     fontFamily: typography.fonts.inter.semiBold,
     fontSize: typography.sizes.m,
-    color: "#fff",
+    color: palette.white,
   },
   ctaLabelDisabled: { color: colors.buttonDisabledText },
 
   /* ── Country picker modal ────────────────────────────────── */
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.35)",
+    backgroundColor: palette.overlaySheet,
   },
   sheet: {
     backgroundColor: colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: spacing.l,
+    borderTopRightRadius: spacing.l,
     paddingHorizontal: spacing.screenPadding,
     paddingBottom: spacing.xxl,
     maxHeight: "60%",
   },
   sheetHandle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
+    width: spacing.sheetHandleWidth,
+    height: spacing.sheetHandleHeight,
+    borderRadius: spacing.xxxs,
     backgroundColor: palette.gray30,
     alignSelf: "center",
     marginVertical: spacing.s,
@@ -468,7 +461,7 @@ const styles = StyleSheet.create({
   },
   countryRowPressed: { backgroundColor: palette.gray10 },
   countryRowSelected: { backgroundColor: palette.orange10 },
-  countryRowFlag: { fontSize: 22 },
+  countryRowFlag: { fontSize: spacing.countryFlag },
   countryRowName: {
     flex: 1,
     fontFamily: typography.fonts.inter.normal,
@@ -480,5 +473,5 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.m,
     color: colors.textSecondary,
   },
-  sep: { height: 1, backgroundColor: palette.gray20 },
+  sep: { height: spacing.hairline, backgroundColor: palette.gray20 },
 });

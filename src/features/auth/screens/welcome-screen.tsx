@@ -5,30 +5,16 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import type { RootStackParamList } from "@/navigation/types";
-import { colors } from "@/theme/colors";
+import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
 
 const HERO = require("../../../../assets/get-started-hero.png") as number;
 
 /**
- * Figma button spec:
- *   height 58 · radius 12 · padding 16 12 · gap 2
- *   fill: linear-gradient(180deg, #FF6D00 → #FF3900)
- *   shadow: 0 8px 0 rgba(0,0,0,.2) + 0 8px 0 #FF3900  ← the "3D depth" effect
- *
- * We replicate the depth by sitting the face (58px, #FF6D00) on top of a
- * dark-orange wrapper (66px total = 58 face + 8 depth, #FF3900).
- * On press the face translates down 8px → depth "disappears" → button looks pushed.
- * Gradient requires expo-linear-gradient native rebuild; we use solid #FF6D00 top-face
- * with the depth layer giving the darker bottom feel.
+ * Figma CTA: face + depth using `palette.authCtaFace` / `palette.authCtaDepth`;
+ * dimensions from `spacing.authCtaFaceHeight`, `spacing.authCtaDepth`, `spacing.inputRadius`.
  */
-const BTN_FACE_H = 58;
-const BTN_DEPTH = 8;
-const BTN_RADIUS = 12;
-const BTN_ORANGE = "#FF6D00"; // gradient start / face colour
-const BTN_DEEP = "#FF3900"; // gradient end / depth / shadow colour
-
 type Props = NativeStackScreenProps<RootStackParamList, "Welcome">;
 
 export function WelcomeScreen({ navigation }: Props) {
@@ -72,7 +58,7 @@ export function WelcomeScreen({ navigation }: Props) {
         >
           {({ pressed }) => (
             <View style={[styles.ctaFace, pressed && styles.ctaFacePressed]}>
-              <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
+              <Ionicons name="checkmark-circle-outline" size={spacing.iconLg} color={palette.white} />
               <Text style={styles.ctaLabel}>{"  "}Let's go</Text>
             </View>
           )}
@@ -106,12 +92,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   hero: {
-    width: 310,
-    height: 310,
+    width: spacing.welcomeHero,
+    height: spacing.welcomeHero,
   },
   title: {
-    fontSize: 28,
-    lineHeight: 37,
+    fontSize: typography.sizes.welcomeTitle,
+    lineHeight: typography.lineHeights.welcomeTitle,
     textAlign: "center",
     fontFamily: typography.fonts.inter.bold,
     paddingHorizontal: spacing.xs,
@@ -128,48 +114,44 @@ const styles = StyleSheet.create({
 
   /* ── 3D button ─────────────────────────────────────────────── */
 
-  /** Depth / shadow layer: same radius, solid #FF3900, height = face + depth */
   ctaWrapper: {
     width: "100%",
-    height: BTN_FACE_H + BTN_DEPTH,
-    backgroundColor: BTN_DEEP,
-    borderRadius: BTN_RADIUS,
+    height: spacing.authCtaFaceHeight + spacing.authCtaDepth,
+    backgroundColor: palette.authCtaDepth,
+    borderRadius: spacing.inputRadius,
     marginBottom: spacing.m,
-    // iOS + Android black ambient shadow (rgba(0,0,0,.2) offset 8px)
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
+        shadowColor: palette.shadow,
+        shadowOffset: { width: 0, height: spacing.xs },
         shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowRadius: spacing.xxxs,
       },
       android: { elevation: 8 },
       default: {},
     }),
   },
 
-  /** Button face: sits at top of wrapper, leaves BTN_DEPTH px of dark orange below */
   ctaFace: {
-    height: BTN_FACE_H,
-    backgroundColor: BTN_ORANGE,
-    borderRadius: BTN_RADIUS,
+    height: spacing.authCtaFaceHeight,
+    backgroundColor: palette.authCtaFace,
+    borderRadius: spacing.inputRadius,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 16,
-    gap: 2,
+    paddingHorizontal: spacing.s,
+    paddingVertical: spacing.m,
+    gap: spacing.tabLabelGap,
   },
 
-  /** On press: face slides down 8 px → depth "closes" → pressed-in feel */
   ctaFacePressed: {
-    transform: [{ translateY: BTN_DEPTH }],
+    transform: [{ translateY: spacing.authCtaDepth }],
   },
 
   ctaLabel: {
     fontFamily: typography.fonts.inter.semiBold,
     fontSize: typography.sizes.m,
-    color: "#fff",
+    color: palette.white,
   },
 
   /* ── Legal ──────────────────────────────────────────────────── */
@@ -178,7 +160,7 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     color: colors.textSecondary,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: typography.lineHeights.legal,
   },
   legalBase: {
     color: colors.textSecondary,

@@ -22,8 +22,6 @@ const user = userData as User;
 const TRIAL_BANNER_PNG = require("../../../../assets/profile.png") as number;
 const TRIAL_BANNER_ASPECT = 714 / 406;
 
-const PROFILE_DOWNLOAD_BG = "#DCFCE7";
-
 type TabNav = BottomTabNavigationProp<MainTabParamList>;
 
 type SettingsRow =
@@ -268,7 +266,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 10,
-    backgroundColor: PROFILE_DOWNLOAD_BG,
+    backgroundColor: palette.profileDownloadTint,
     alignItems: "center",
     justifyContent: "center",
   },
