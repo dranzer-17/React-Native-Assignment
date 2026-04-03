@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import * as Haptics from "expo-haptics";
 import { Pressable, StyleSheet, Text, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -67,6 +68,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
     function handlePress(routeName: string, routeKey: string, isFocused: boolean) {
         const event = navigation.emit({ type: "tabPress", target: routeKey, canPreventDefault: true });
         if (!isFocused && !event.defaultPrevented) {
+            void Haptics.selectionAsync();
             navigation.navigate(routeName);
         }
     }

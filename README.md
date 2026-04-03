@@ -317,12 +317,11 @@ These are non-negotiable. Your submission will be evaluated against them.
 
 Entirely optional — but they separate good submissions from great ones.
 
-- Smooth screen transitions using `react-native-reanimated`
-- Animated bottom sheet for the Home open state
-- Skeleton/shimmer loading states
-- Haptic feedback on button presses (`expo-haptics`)
-- Accessibility labels (`accessibilityLabel`, `accessibilityRole`)
-- `React.memo` on list items, `useMemo` for derived data
+- **Screen motion:** Native stack transitions per route (`fade`, `slide_from_right`, `fade_from_bottom`, `slide_from_bottom`) plus **Reanimated** entering animations on the Home **modal popover** (`FadeIn` backdrop, `FadeInDown` card). (A **bottom sheet** is also acceptable per Screen 5 — this repo uses an anchored popover instead.)
+- **Skeleton / shimmer:** `ShimmerPlaceholder` + `QuestionListEmpty` on the Home `FlashList` when `data` is empty.
+- **Haptics:** `expo-haptics` on shared `Button`, Settings trial CTA, **question cards**, **FEEDBACK** in the popover, and **tab** switches in `CustomTabBar`.
+- **Accessibility:** `accessibilityLabel` / `accessibilityRole` (and `accessibilityState` where needed) on buttons, tabs, OTP fields, popover actions, etc.
+- **`React.memo` / `useMemo`:** e.g. `QuestionCard`, `SocialProofBanner`, `QuestionListEmpty`, and memoized list header / `renderItem` callbacks on Home.
 
 ---
 

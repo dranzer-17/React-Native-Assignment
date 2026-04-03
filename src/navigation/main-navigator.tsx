@@ -14,7 +14,11 @@ function HomeStackNavigator() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="Home" component={HomeScreen} />
-      <HomeStack.Screen name="SessionResult" component={SessionResultScreen} />
+      <HomeStack.Screen
+        name="SessionResult"
+        component={SessionResultScreen}
+        options={{ animation: "slide_from_bottom" }}
+      />
     </HomeStack.Navigator>
   );
 }

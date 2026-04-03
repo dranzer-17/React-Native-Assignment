@@ -9,11 +9,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Splash">
-      <Stack.Screen name="Splash" component={SplashScreen} />
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+      }}
+      initialRouteName="Splash"
+    >
+      <Stack.Screen name="Splash" component={SplashScreen} options={{ animation: "fade" }} />
+      <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ animation: "fade" }} />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Main" component={MainNavigator} />
+      <Stack.Screen
+        name="Main"
+        component={MainNavigator}
+        options={{ animation: "fade_from_bottom" }}
+      />
     </Stack.Navigator>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import { QuestionCard } from "@/features/home/components/question-card";
+import { QuestionListEmpty } from "@/features/home/components/question-list-empty";
 import { QuestionPopover } from "@/features/home/components/question-popover";
 import { useHomeQuestionPopover } from "@/features/home/hooks/use-home-question-popover";
 import type { HomeStackParamList } from "@/navigation/types";
@@ -114,6 +115,7 @@ export function HomeScreen({ navigation }: Props) {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={listHeader}
+        ListEmptyComponent={QuestionListEmpty}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       />
@@ -129,7 +131,7 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 /** Figma: "X users completed Question N today" strip — no bg, dashed line below */
-function SocialProofBanner({ question }: { question: Question }) {
+const SocialProofBanner = memo(function SocialProofBanner({ question }: { question: Question }) {
   return (
     <View style={styles.proofWrap}>
       <View style={styles.proofBanner}>
@@ -143,7 +145,7 @@ function SocialProofBanner({ question }: { question: Question }) {
       <View style={styles.proofDash} />
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {

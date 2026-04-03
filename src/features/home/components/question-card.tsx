@@ -1,4 +1,5 @@
 import { memo, useRef } from "react";
+import * as Haptics from "expo-haptics";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { Image } from "expo-image";
 import type { ImageSource } from "expo-image";
@@ -119,6 +120,7 @@ export const QuestionCard = memo(function QuestionCard({
   const marginLeft = getMarginLeft(index);
 
   function handlePress() {
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     cardRef.current?.measureInWindow((x, y, width, height) => {
       onPressCard(item, { x, y, width, height });
     });

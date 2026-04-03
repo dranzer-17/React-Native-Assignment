@@ -1,4 +1,6 @@
+import * as Haptics from "expo-haptics";
 import { Dimensions, Modal, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import type { Question } from "@/types/mock-data";
 import { typography } from "@/theme/typography";
@@ -58,10 +60,23 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
     : { top: cardLayout.y + cardLayout.height + GAP_FROM_CARD, left: popoverLeft };
 
   return (
-    <Modal transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+    <Modal transparent animationType="none" onRequestClose={onClose}>
+      <Animated.View
+        entering={FadeIn.duration(200)}
+        style={[StyleSheet.absoluteFill, styles.dim]}
+      >
+        <Pressable
+          style={StyleSheet.absoluteFill}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss question details"
+        />
+      </Animated.View>
 
-      <View style={[styles.popover, positionStyle, { backgroundColor: colors.bg }]}>
+      <Animated.View
+        entering={FadeInDown.springify().damping(18).stiffness(220)}
+        style={[styles.popover, positionStyle, { backgroundColor: colors.bg }]}
+      >
         {/* Arrow — DOWN when popover is above card, UP when below */}
         {showAbove ? (
           <View style={[styles.arrowDown, { left: arrowOffsetInPop, borderTopColor: colors.bg }]} />
@@ -69,7 +84,12 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
           <View style={[styles.arrowUp, { left: arrowOffsetInPop, borderBottomColor: colors.bg }]} />
         )}
 
-        <Text style={[styles.questionText, { color: colors.text }]}>{question.text}</Text>
+        <Text
+          style={[styles.questionText, { color: colors.text }]}
+          accessibilityRole="header"
+        >
+          {question.text}
+        </Text>
 
         <View style={styles.metaRow}>
           <Text style={[styles.askedBy, { color: colors.text, opacity: 0.75 }]}>
@@ -83,17 +103,31 @@ export function QuestionPopover({ question, cardLayout, onFeedback, onClose }: Q
           </View>
         </View>
 
-        <Pressable style={styles.feedbackBtn} onPress={onFeedback} accessibilityRole="button">
+        <Pressable
+          style={styles.feedbackBtn}
+          onPress={() => {
+            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onFeedback();
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Open feedback for this question"
+        >
           <Text style={styles.feedbackLabel}>FEEDBACK</Text>
         </Pressable>
 
         <View style={[styles.aiWrapper, { backgroundColor: colors.aiBtn }]}>
-          <Pressable style={styles.aiFace} disabled>
+          <Pressable
+            style={styles.aiFace}
+            disabled
+            accessibilityRole="button"
+            accessibilityState={{ disabled: true }}
+            accessibilityLabel="AI versus AI listen, coming soon"
+          >
             <Ionicons name="headset" size={18} color="#fff" />
             <Text style={styles.aiLabel}>  AI VS AI (LISTEN)</Text>
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
     </Modal>
   );
 }
@@ -104,6 +138,9 @@ const shadow = Platform.select({
 });
 
 const styles = StyleSheet.create({
+  dim: {
+    backgroundColor: "rgba(0,0,0,0.38)",
+  },
   popover: {
     position: "absolute",
     width: POPOVER_W,
