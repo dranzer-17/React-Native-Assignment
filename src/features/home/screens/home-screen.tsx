@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import { QuestionCard } from "@/features/home/components/question-card";
 import { QuestionListEmpty } from "@/features/home/components/question-list-empty";
 import { QuestionPopover } from "@/features/home/components/question-popover";
+import { SocialProofBanner } from "@/features/home/components/social-proof-banner";
 import { useHomeQuestionPopover } from "@/features/home/hooks/use-home-question-popover";
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
@@ -130,23 +131,6 @@ export function HomeScreen({ navigation }: Props) {
   );
 }
 
-/** Figma: "X users completed Question N today" strip — no bg, dashed line below */
-const SocialProofBanner = memo(function SocialProofBanner({ question }: { question: Question }) {
-  return (
-    <View style={styles.proofWrap}>
-      <View style={styles.proofBanner}>
-        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
-        <Text style={styles.proofText}>
-          {question.completedTodayCount.toLocaleString()} users completed Question{" "}
-          {question.questionNumber} today
-        </Text>
-        <Ionicons name="flag" size={14} color="#BF9C26" style={styles.proofIcon} />
-      </View>
-      <View style={styles.proofDash} />
-    </View>
-  );
-});
-
 const styles = StyleSheet.create({
   root: {
     flex: 1,
@@ -250,33 +234,5 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.m,
     color: palette.gray90,
     lineHeight: 20,
-  },
-
-  /* ── Social proof banner ────────────────────────────────── */
-  proofWrap: {
-    marginBottom: spacing.s,
-  },
-  proofBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: spacing.s,
-    paddingVertical: spacing.xs,
-    gap: spacing.xxs,
-  },
-  proofIcon: { marginHorizontal: 2 },
-  proofText: {
-    fontFamily: typography.fonts.inter.semiBold,
-    fontSize: typography.sizes.xs,
-    color: "#BF9C26",
-    letterSpacing: 0.2,
-    flex: 1,
-    textAlign: "center",
-  },
-  proofDash: {
-    height: 0,
-    borderBottomWidth: 1.5,
-    borderBottomColor: "#BF9C26",
-    borderStyle: "dashed",
-    marginHorizontal: spacing.s,
   },
 });

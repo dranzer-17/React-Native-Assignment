@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { HomeStackParamList } from "@/navigation/types";
+import { useMockInterviewAudio } from "@/features/session-result/hooks/use-mock-interview-audio";
 import questionsData from "@/mock-data/questions.json";
 import sessionResultData from "@/mock-data/session-result.json";
 import type { KeyMoment, Question, SessionResult } from "@/types/mock-data";
@@ -86,6 +87,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
   const { questionId } = route.params;
   const [tab, setTab] = useState<"summary" | "moments">("summary");
   const [selectedMomentIndex, setSelectedMomentIndex] = useState(0);
+  const { playing: mockAudioPlaying, toggle: toggleMockInterviewAudio } = useMockInterviewAudio();
 
   const question = useMemo(
     () => questions.find((q) => q.id === questionId) ?? questions[0],
@@ -134,10 +136,20 @@ export function SessionResultScreen({ navigation, route }: Props) {
         <View style={styles.playerCard}>
           <Pressable
             style={styles.playBtn}
+            onPress={() => {
+              void toggleMockInterviewAudio();
+            }}
             accessibilityRole="button"
-            accessibilityLabel="Play mock interview"
+            accessibilityLabel={
+              mockAudioPlaying ? "Pause mock interview audio" : "Play mock interview audio"
+            }
+            accessibilityState={{ busy: mockAudioPlaying }}
           >
-            <Ionicons name="play" size={22} color={colors.primary} />
+            <Ionicons
+              name={mockAudioPlaying ? "pause" : "play"}
+              size={22}
+              color={colors.primary}
+            />
           </Pressable>
           <View style={styles.playerMeta}>
             <Text style={styles.playerTitle}>Mock Interview</Text>
@@ -154,7 +166,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
         </View>
       </View>
     ),
-    [durationLabel, progressRatio],
+    [durationLabel, progressRatio, mockAudioPlaying, toggleMockInterviewAudio],
   );
 
   const renderMomentItem = useCallback(
