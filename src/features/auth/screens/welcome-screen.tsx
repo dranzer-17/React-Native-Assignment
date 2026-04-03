@@ -50,6 +50,7 @@ export function WelcomeScreen({ navigation }: Props) {
           source={HERO}
           style={styles.hero}
           contentFit="contain"
+          cachePolicy="memory-disk"
           accessibilityIgnoresInvertColors
         />
       </View>

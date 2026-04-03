@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { FlashList, type ListRenderItemInfo } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -14,7 +14,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
 import sessionResultData from "@/mock-data/session-result.json";
-import type { Question, SessionResult } from "@/types/mock-data";
+import type { KeyMoment, Question, SessionResult } from "@/types/mock-data";
 import { colors, palette } from "@/theme/colors";
 import { spacing } from "@/theme/spacing";
 import { typography } from "@/theme/typography";
@@ -58,6 +58,29 @@ function getLogoSource(companyId: string) {
   return LOCAL_LOGOS[companyId] ?? null;
 }
 
+type SummaryRow =
+  | { kind: "heading"; id: string; title: string }
+  | { kind: "bullet"; id: string; text: string }
+  | { kind: "divider"; id: string };
+
+function buildSummaryRows(session: SessionResult): SummaryRow[] {
+  return [
+    { kind: "heading", id: "h-ww", title: "What worked well" },
+    ...session.smartSummary.whatWorkedWell.map((text, i) => ({
+      kind: "bullet" as const,
+      id: `w-${i}`,
+      text,
+    })),
+    { kind: "divider", id: "div-mid" },
+    { kind: "heading", id: "h-ot", title: "Overall takeaways" },
+    ...session.smartSummary.overallTakeaways.map((text, i) => ({
+      kind: "bullet" as const,
+      id: `t-${i}`,
+      text,
+    })),
+  ];
+}
+
 export function SessionResultScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { questionId } = route.params;
@@ -85,6 +108,80 @@ export function SessionResultScreen({ navigation, route }: Props) {
   /** Static mock progress ratio for the bar (0–1) */
   const progressRatio = 0.18;
 
+  const summaryRows = useMemo(() => buildSummaryRows(session), [session]);
+
+  const renderSummaryItem = useCallback(({ item }: ListRenderItemInfo<SummaryRow>) => {
+    switch (item.kind) {
+      case "heading":
+        return <Text style={styles.sectionTitle}>{item.title}</Text>;
+      case "bullet":
+        return (
+          <View style={styles.bulletRow}>
+            <Text style={styles.bulletDiamond}>{DIAMOND}</Text>
+            <Text style={styles.bulletText}>{item.text}</Text>
+          </View>
+        );
+      case "divider":
+        return <View style={styles.sectionDivider} />;
+      default:
+        return null;
+    }
+  }, []);
+
+  const momentsListHeader = useMemo(
+    () => (
+      <View style={styles.momentsListHeader}>
+        <View style={styles.playerCard}>
+          <Pressable
+            style={styles.playBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Play mock interview"
+          >
+            <Ionicons name="play" size={22} color={colors.primary} />
+          </Pressable>
+          <View style={styles.playerMeta}>
+            <Text style={styles.playerTitle}>Mock Interview</Text>
+            <View style={styles.progressTrack}>
+              <View
+                style={[styles.progressFill, { width: `${progressRatio * 100}%` }]}
+              />
+            </View>
+            <View style={styles.timeRow}>
+              <Text style={styles.timeLabel}>00:00</Text>
+              <Text style={styles.timeLabel}>{durationLabel}</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    ),
+    [durationLabel, progressRatio],
+  );
+
+  const renderMomentItem = useCallback(
+    ({ item, index }: ListRenderItemInfo<KeyMoment>) => {
+      const selected = index === selectedMomentIndex;
+      return (
+        <Pressable
+          onPress={() => setSelectedMomentIndex(index)}
+          style={styles.momentRow}
+          accessibilityRole="button"
+          accessibilityState={{ selected }}
+        >
+          <View
+            style={[
+              styles.momentInner,
+              selected && styles.momentInnerSelected,
+            ]}
+          >
+            <Text style={styles.momentTime}>{item.timestamp}</Text>
+            <Text style={styles.momentText}>{item.description}</Text>
+          </View>
+        </Pressable>
+      );
+    },
+    [selectedMomentIndex],
+  );
+
   return (
     <View style={styles.root}>
       {/* ── Green top section ─────────────────────────────────── */}
@@ -108,6 +205,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
               source={require("../../../../assets/humans.png")}
               style={styles.humansImg}
               contentFit="cover"
+              cachePolicy="memory-disk"
               accessibilityIgnoresInvertColors
             />
           </View>
@@ -118,6 +216,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
               source={require("../../../../assets/humans.png")}
               style={[styles.humansImg, styles.humansImgRight]}
               contentFit="cover"
+              cachePolicy="memory-disk"
               accessibilityIgnoresInvertColors
             />
           </View>
@@ -135,6 +234,7 @@ export function SessionResultScreen({ navigation, route }: Props) {
                 source={logoSource}
                 style={styles.companyLogo}
                 contentFit="contain"
+                cachePolicy="memory-disk"
                 accessibilityIgnoresInvertColors
               />
             ) : (
@@ -179,83 +279,25 @@ export function SessionResultScreen({ navigation, route }: Props) {
 
         {/* Content */}
         {tab === "summary" ? (
-          <ScrollView
+          <FlashList
+            data={summaryRows}
+            renderItem={renderSummaryItem}
+            keyExtractor={(row) => row.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 40 }]}
-          >
-            <Text style={styles.sectionTitle}>What worked well</Text>
-            {session.smartSummary.whatWorkedWell.map((line, i) => (
-              <View key={`w-${i}`} style={styles.bulletRow}>
-                <Text style={styles.bulletDiamond}>{DIAMOND}</Text>
-                <Text style={styles.bulletText}>{line}</Text>
-              </View>
-            ))}
-
-            <View style={styles.sectionDivider} />
-
-            <Text style={styles.sectionTitle}>Overall takeaways</Text>
-            {session.smartSummary.overallTakeaways.map((line, i) => (
-              <View key={`t-${i}`} style={styles.bulletRow}>
-                <Text style={styles.bulletDiamond}>{DIAMOND}</Text>
-                <Text style={styles.bulletText}>{line}</Text>
-              </View>
-            ))}
-          </ScrollView>
+          />
         ) : (
-          <ScrollView
+          <FlashList
+            data={session.keyMoments}
+            renderItem={renderMomentItem}
+            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+            ListHeaderComponent={momentsListHeader}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[
               styles.momentsScroll,
               { paddingBottom: insets.bottom + 40 },
             ]}
-          >
-            {/* Mock interview player card */}
-            <View style={styles.playerCard}>
-              <Pressable
-                style={styles.playBtn}
-                accessibilityRole="button"
-                accessibilityLabel="Play mock interview"
-              >
-                <Ionicons name="play" size={22} color={colors.primary} />
-              </Pressable>
-              <View style={styles.playerMeta}>
-                <Text style={styles.playerTitle}>Mock Interview</Text>
-                <View style={styles.progressTrack}>
-                  <View
-                    style={[styles.progressFill, { width: `${progressRatio * 100}%` }]}
-                  />
-                </View>
-                <View style={styles.timeRow}>
-                  <Text style={styles.timeLabel}>00:00</Text>
-                  <Text style={styles.timeLabel}>{durationLabel}</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Key moments list */}
-            {session.keyMoments.map((item, i) => {
-              const selected = i === selectedMomentIndex;
-              return (
-                <Pressable
-                  key={`${item.timestamp}-${i}`}
-                  onPress={() => setSelectedMomentIndex(i)}
-                  style={styles.momentRow}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                >
-                  <View
-                    style={[
-                      styles.momentInner,
-                      selected && styles.momentInnerSelected,
-                    ]}
-                  >
-                    <Text style={styles.momentTime}>{item.timestamp}</Text>
-                    <Text style={styles.momentText}>{item.description}</Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
+          />
         )}
       </View>
     </View>
@@ -460,6 +502,9 @@ const styles = StyleSheet.create({
   momentsScroll: {
     paddingHorizontal: spacing.screenPadding,
     paddingTop: 8,
+  },
+  momentsListHeader: {
+    paddingBottom: 0,
   },
   playerCard: {
     flexDirection: "row",

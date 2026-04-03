@@ -1,9 +1,11 @@
+import { useCallback } from "react";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { FlashList, type ListRenderItemInfo } from "@shopify/flash-list";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigateToWelcome } from "@/navigation/root-navigation-ref";
 import type { MainTabParamList } from "@/navigation/types";
@@ -23,6 +25,23 @@ const TRIAL_BANNER_ASPECT = 714 / 406;
 const PROFILE_DOWNLOAD_BG = "#DCFCE7";
 
 type TabNav = BottomTabNavigationProp<MainTabParamList>;
+
+type SettingsRow =
+  | { type: "header"; key: string }
+  | { type: "trial"; key: string }
+  | { type: "update"; key: string }
+  | { type: "info"; key: string }
+  | { type: "actions"; key: string }
+  | { type: "footer"; key: string };
+
+const SETTINGS_ROWS: SettingsRow[] = [
+  { type: "header", key: "header" },
+  { type: "trial", key: "trial" },
+  { type: "update", key: "update" },
+  { type: "info", key: "info" },
+  { type: "actions", key: "actions" },
+  { type: "footer", key: "footer" },
+];
 
 interface ActionRowProps {
   icon: keyof typeof Ionicons.glyphMap;
@@ -60,12 +79,115 @@ export function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<TabNav>();
 
-  const onTrialCta = () => {
+  const onTrialCta = useCallback(() => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<SettingsRow>) => {
+      switch (item.type) {
+        case "header":
+          return (
+            <View style={styles.header}>
+              <Pressable
+                onPress={() => navigation.navigate("HomeTab")}
+                style={({ pressed }) => [styles.headerSide, pressed && styles.headerPressed]}
+                accessibilityRole="button"
+                accessibilityLabel="Back"
+              >
+                <Ionicons name="chevron-back" size={26} color={palette.gray90} />
+              </Pressable>
+              <Text style={styles.headerTitle} numberOfLines={1}>
+                Your Profile
+              </Text>
+              <View style={styles.headerSide} />
+            </View>
+          );
+        case "trial":
+          return (
+            <Pressable
+              onPress={onTrialCta}
+              style={({ pressed }) => [styles.trialBannerPress, pressed && styles.trialBannerPressed]}
+              accessibilityRole="button"
+              accessibilityLabel="Start 3 days trial for 1 rupee"
+            >
+              <Image
+                source={TRIAL_BANNER_PNG}
+                style={styles.trialBannerImage}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                accessibilityIgnoresInvertColors
+              />
+            </Pressable>
+          );
+        case "update":
+          return (
+            <View style={styles.outlineCard}>
+              <Ionicons name="grid-outline" size={22} color={palette.gray70} />
+              <Text style={styles.updateLabel}>New update available</Text>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.downloadBtn,
+                  pressed && styles.downloadBtnPressed,
+                ]}
+                accessibilityRole="button"
+                accessibilityLabel="Download update"
+              >
+                <Ionicons name="download-outline" size={18} color={palette.green60} />
+              </Pressable>
+            </View>
+          );
+        case "info":
+          return (
+            <View style={styles.outlineCardStack}>
+              <View style={styles.infoRow}>
+                <Ionicons name="call-outline" size={20} color={palette.gray70} />
+                <Text style={styles.infoLabel}>Phone number</Text>
+                <Text style={styles.infoValue}>{user.phone}</Text>
+              </View>
+              <View style={styles.rowDivider} />
+              <View style={styles.infoRow}>
+                <Ionicons name="calendar-outline" size={20} color={palette.gray70} />
+                <Text style={styles.infoLabel}>Learning since</Text>
+                <Text style={styles.infoValue}>{user.learningSince}</Text>
+              </View>
+            </View>
+          );
+        case "actions":
+          return (
+            <View style={styles.outlineCardStack}>
+              <ActionRow icon="chatbubble-ellipses-outline" label="Chat with us" />
+              <View style={styles.rowDivider} />
+              <ActionRow icon="share-outline" label="Share the app" />
+              <View style={styles.rowDivider} />
+              <ActionRow icon="star-outline" label="Rate the app" />
+              <View style={styles.rowDivider} />
+              <ActionRow
+                icon="log-out-outline"
+                label="Log out"
+                destructive
+                onPress={() => navigateToWelcome()}
+              />
+            </View>
+          );
+        case "footer":
+          return (
+            <Text style={styles.footer}>
+              App version v2.14.2{"\n"}Made with ❤️ from India
+            </Text>
+          );
+        default:
+          return null;
+      }
+    },
+    [navigation, onTrialCta],
+  );
 
   return (
-    <ScrollView
+    <FlashList
+      data={SETTINGS_ROWS}
+      renderItem={renderItem}
+      keyExtractor={(row) => row.key}
       style={styles.root}
       contentContainerStyle={[
         styles.content,
@@ -75,89 +197,7 @@ export function SettingsScreen() {
         },
       ]}
       showsVerticalScrollIndicator={false}
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Pressable
-          onPress={() => navigation.navigate("HomeTab")}
-          style={({ pressed }) => [styles.headerSide, pressed && styles.headerPressed]}
-          accessibilityRole="button"
-          accessibilityLabel="Back"
-        >
-          <Ionicons name="chevron-back" size={26} color={palette.gray90} />
-        </Pressable>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          Your Profile
-        </Text>
-        <View style={styles.headerSide} />
-      </View>
-
-      {/* Trial promo — single PNG (replace asset in assets/profile.png to update design) */}
-      <Pressable
-        onPress={onTrialCta}
-        style={({ pressed }) => [styles.trialBannerPress, pressed && styles.trialBannerPressed]}
-        accessibilityRole="button"
-        accessibilityLabel="Start 3 days trial for 1 rupee"
-      >
-        <Image
-          source={TRIAL_BANNER_PNG}
-          style={styles.trialBannerImage}
-          contentFit="cover"
-          accessibilityIgnoresInvertColors
-        />
-      </Pressable>
-
-      {/* Update available */}
-      <View style={styles.outlineCard}>
-        <Ionicons name="grid-outline" size={22} color={palette.gray70} />
-        <Text style={styles.updateLabel}>New update available</Text>
-        <Pressable
-          style={({ pressed }) => [
-            styles.downloadBtn,
-            pressed && styles.downloadBtnPressed,
-          ]}
-          accessibilityRole="button"
-          accessibilityLabel="Download update"
-        >
-          <Ionicons name="download-outline" size={18} color={palette.green60} />
-        </Pressable>
-      </View>
-
-      {/* Phone + learning since */}
-      <View style={styles.outlineCardStack}>
-        <View style={styles.infoRow}>
-          <Ionicons name="call-outline" size={20} color={palette.gray70} />
-          <Text style={styles.infoLabel}>Phone number</Text>
-          <Text style={styles.infoValue}>{user.phone}</Text>
-        </View>
-        <View style={styles.rowDivider} />
-        <View style={styles.infoRow}>
-          <Ionicons name="calendar-outline" size={20} color={palette.gray70} />
-          <Text style={styles.infoLabel}>Learning since</Text>
-          <Text style={styles.infoValue}>{user.learningSince}</Text>
-        </View>
-      </View>
-
-      {/* Actions */}
-      <View style={styles.outlineCardStack}>
-        <ActionRow icon="chatbubble-ellipses-outline" label="Chat with us" />
-        <View style={styles.rowDivider} />
-        <ActionRow icon="share-outline" label="Share the app" />
-        <View style={styles.rowDivider} />
-        <ActionRow icon="star-outline" label="Rate the app" />
-        <View style={styles.rowDivider} />
-        <ActionRow
-          icon="log-out-outline"
-          label="Log out"
-          destructive
-          onPress={() => navigateToWelcome()}
-        />
-      </View>
-
-      <Text style={styles.footer}>
-        App version v2.14.2{"\n"}Made with ❤️ from India
-      </Text>
-    </ScrollView>
+    />
   );
 }
 

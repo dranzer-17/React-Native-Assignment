@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
@@ -7,7 +7,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { ReadyAiLogo } from "@/components/ui/ready-brand";
 import { QuestionCard } from "@/features/home/components/question-card";
 import { QuestionPopover } from "@/features/home/components/question-popover";
-import type { CardLayout } from "@/features/home/components/question-popover";
+import { useHomeQuestionPopover } from "@/features/home/hooks/use-home-question-popover";
 import type { HomeStackParamList } from "@/navigation/types";
 import questionsData from "@/mock-data/questions.json";
 import type { Question } from "@/types/mock-data";
@@ -38,25 +38,8 @@ function NotificationBadge({ count }: { count: number }) {
 
 export function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-
-  const [popoverQuestion, setPopoverQuestion] = useState<Question | null>(null);
-  const [popoverLayout, setPopoverLayout] = useState<CardLayout | null>(null);
-
-  const openPopover = useCallback((q: Question, layout: CardLayout) => {
-    setPopoverQuestion(q);
-    setPopoverLayout(layout);
-  }, []);
-
-  const closePopover = useCallback(() => {
-    setPopoverQuestion(null);
-    setPopoverLayout(null);
-  }, []);
-
-  const onFeedback = useCallback(() => {
-    const id = popoverQuestion?.id ?? "q1";
-    closePopover();
-    navigation.navigate("SessionResult", { questionId: id });
-  }, [navigation, popoverQuestion?.id, closePopover]);
+  const { popoverQuestion, popoverLayout, openPopover, closePopover, onFeedback } =
+    useHomeQuestionPopover(navigation);
 
   const renderItem = useCallback(
     ({ item, index }: { item: Question; index: number }) => (

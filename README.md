@@ -157,7 +157,7 @@ Refer to the Figma's **Home** screen.
 
 Refer to the Figma's **Home – Open State** screen.
 
-This is the expanded/detail state triggered by tapping a question card on the Home screen. It can be implemented as a **bottom sheet** (using `@gorhom/bottom-sheet`) or as an inline expansion — match the Figma.
+This is the expanded/detail state triggered by tapping a question card on the Home screen. It can be implemented as a **modal / anchored popover**, a bottom sheet, or an inline expansion — match the Figma. (This project uses `question-popover.tsx` with React Native `Modal`.)
 
 - Question text (e.g. "API latency is variable & app is sluggish. How do you design UI safely?")
 - "Asked by [Company Name]" with company logo
@@ -289,7 +289,6 @@ These are non-negotiable. Your submission will be evaluated against them.
 |---|---|
 | `@react-navigation/native-stack` | Stack navigator (auth flow) |
 | `@react-navigation/bottom-tabs` | Main tab navigator |
-| `@gorhom/bottom-sheet` | Home open state |
 | `@shopify/flash-list` | All scrollable lists |
 | `expo-image` | All images (`cachePolicy="memory-disk"`) |
 | `react-native-reanimated` | Animations |
@@ -370,36 +369,34 @@ src/
 ├── components/
 │   └── ui/
 │       ├── button.tsx
-│       ├── text.tsx
-│       └── ...
+│       └── ready-brand.tsx
 ├── features/
 │   ├── auth/
-│   │   ├── screens/
-│   │   │   ├── splash-screen.tsx
-│   │   │   ├── welcome-screen.tsx
-│   │   │   └── login-screen.tsx
-│   │   └── types.ts
+│   │   └── screens/
+│   │       ├── splash-screen.tsx
+│   │       ├── welcome-screen.tsx
+│   │       └── login-screen.tsx
 │   ├── home/
 │   │   ├── components/
 │   │   │   ├── question-card.tsx
-│   │   │   └── question-bottom-sheet.tsx
-│   │   ├── screens/
-│   │   │   └── home-screen.tsx
-│   │   └── types.ts
+│   │   │   └── question-popover.tsx
+│   │   ├── hooks/
+│   │   │   └── use-home-question-popover.ts
+│   │   └── screens/
+│   │       └── home-screen.tsx
 │   ├── session-result/
-│   │   ├── components/
-│   │   │   ├── smart-summary-tab.tsx
-│   │   │   └── key-moments-tab.tsx
-│   │   ├── screens/
-│   │   │   └── session-result-screen.tsx
-│   │   └── types.ts
-│   └── settings/
-│       ├── screens/
-│       │   └── settings-screen.tsx
-│       └── types.ts
+│   │   └── screens/
+│   │       └── session-result-screen.tsx
+│   ├── settings/
+│   │   └── screens/
+│   │       └── settings-screen.tsx
+│   └── store/
+│       └── screens/
+│           └── store-screen.tsx
 ├── navigation/
+│   ├── custom-tab-bar.tsx
+│   ├── root-navigation-ref.ts
 │   ├── root-navigator.tsx
-│   ├── auth-navigator.tsx
 │   ├── main-navigator.tsx
 │   └── types.ts                  ← centralize all navigation param types here
 ├── theme/

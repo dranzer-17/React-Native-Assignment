@@ -1,18 +1,17 @@
 import { useCallback, useRef, useState } from "react";
 import {
-  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { navigateToMain } from "@/navigation/root-navigation-ref";
 import type { RootStackParamList } from "@/navigation/types";
@@ -109,9 +108,10 @@ export function LoginScreen({ navigation }: Props) {
         <SafeAreaView style={styles.sheet}>
           <View style={styles.sheetHandle} />
           <Text style={styles.sheetTitle}>Select country</Text>
-          <FlatList
+          <FlashList
             data={COUNTRIES}
             keyExtractor={(c) => c.name}
+            ItemSeparatorComponent={() => <View style={styles.sep} />}
             renderItem={({ item }) => (
               <Pressable
                 style={({ pressed }) => [
@@ -135,7 +135,6 @@ export function LoginScreen({ navigation }: Props) {
                 )}
               </Pressable>
             )}
-            ItemSeparatorComponent={() => <View style={styles.sep} />}
           />
         </SafeAreaView>
       </Modal>

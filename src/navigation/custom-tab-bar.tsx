@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { Pressable, StyleSheet, Text, View, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
@@ -34,10 +35,16 @@ function PillTabIcon({
     return <Feather name={name} size={PILL_ICON_SIZE} color={color} />;
 }
 
-const ACTIVE_COLOR = "#F97316";   // Orange/50
+const ACTIVE_COLOR = palette.orange50;
 const INACTIVE_COLOR = palette.gray60;
 const STORE_BG = "#e2f3ff";   // always-on blue tint
 const STORE_ICON_COLOR = "#082f49"; // deep navy — darker icon
+
+type IoniconName = NonNullable<ComponentProps<typeof Ionicons>["name"]>;
+
+function storeBagIcon(active: boolean): IoniconName {
+  return active ? "bag" : "bag-outline";
+}
 
 export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
@@ -110,7 +117,7 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
                     <View style={styles.storeShine2} />
 
                     <Ionicons
-                        name={(storeActive ? "bag" : "bag-outline") as any}
+                        name={storeBagIcon(storeActive)}
                         size={26}
                         color={STORE_ICON_COLOR}
                     />
